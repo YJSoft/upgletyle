@@ -20,13 +20,13 @@
             $oModuleModel = &getModel('module');
 
             $user_id = Context::get('user_id');
-			if(!$user_id) return new Object(-1,'msg_invalid_request');
+			if(!$user_id) return new BaseObject(-1,'msg_invalid_request');
 
             $access_type = Context::get('access_type');
             $domain = preg_replace('/^(http|https):\/\//i','', trim(Context::get('domain')));
 
 			if($access_type == 'local') $domain = 0;
-			if($access_type != 'local' && !$domain) return new Object(-1,'msg_invalid_request');
+			if($access_type != 'local' && !$domain) return new BaseObject(-1,'msg_invalid_request');
 
 
             $tmp_user_id_list = explode(',',$user_id);
@@ -36,7 +36,7 @@
                 if($v) $user_id_list[] = $v;
             }
 
-            if(count($user_id_list)==0) return new Object(-1,'msg_invalid_request');
+            if(count($user_id_list)==0) return new BaseObject(-1,'msg_invalid_request');
 
 
             $output = $this->insertUpgletyle($domain, $user_id_list);
@@ -67,7 +67,7 @@
             else {
             	$member_srl = $oMemberModel->getMemberSrlByEmailAddress($user_id_list[0]);
             }
-            if(!$member_srl) return new Object(-1,'msg_not_user');
+            if(!$member_srl) return new BaseObject(-1,'msg_not_user');
             $member_info = $oMemberModel->getMemberInfoByMemberSrl($member_srl);
 
 			//insert a upgletyle module (domain_srl -1 = shared/local install, no dedicated domain)
@@ -168,7 +168,7 @@
             $doc->homepage = $member_info->homepage;
             $output = $oDocumentController->insertDocument($doc, true);
 
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('module_srl',$module_srl);
             return $output;
         }
@@ -180,14 +180,14 @@
             $oModuleController = getController('module');
 
 			$vars = Context::gets('user_id','domain','access_type','module_srl');
-			if(!$vars->module_srl) return new Object(-1,'msg_invalid_request');
+			if(!$vars->module_srl) return new BaseObject(-1,'msg_invalid_request');
 
 			$domain = ($vars->access_type == 'domain') ? strtolower(trim($vars->domain)) : '';
             if(!$domain && $vars->access_type != 'local')
-				return new Object(-1,'msg_invalid_request');
+				return new BaseObject(-1,'msg_invalid_request');
 
 			$module_info = $oModuleModel->getModuleInfoByModuleSrl($vars->module_srl);
-			if(!$module_info) return new Object(-1,'msg_invalid_request');
+			if(!$module_info) return new BaseObject(-1,'msg_invalid_request');
 
 			$old_domain_srl = intval($module_info->domain_srl);
 			$new_domain_srl = $old_domain_srl;
@@ -244,7 +244,7 @@
 					if(!$output->toBool()) return $output;
 					if($output->data->count > 0)
 					{
-						return new Object(-1, 'msg_cannot_delete_for_child');
+						return new BaseObject(-1, 'msg_cannot_delete_for_child');
 					}
 					$output = executeQuery('menu.deleteMenuItem', $_args);
 					$oMenuAdminController->makeXmlFile($_args->menu_srl);
@@ -312,7 +312,7 @@
                         $admin_list[] = $v;
                         $admin_member_srl[] = $member_srl;
                     }else{
-                        return new Object(-1,'msg_not_user');
+                        return new BaseObject(-1,'msg_not_user');
                     }
                 }
             }
@@ -321,7 +321,7 @@
             foreach($admin_list as $k => $v){
                 $output = $oModuleController->insertAdminId($vars->module_srl, $v);
                 // TODO : insertAdminId return value
-                if(!$output) return new Object(-1,'msg_not_user');
+                if(!$output) return new BaseObject(-1,'msg_not_user');
                 if(!$output->toBool()) return $output;
             }
 
@@ -331,7 +331,7 @@
             $output = executeQuery('upgletyle.updateUpgletyle', $args);
             if(!$output->toBool()) return $output;
 
-            $output = new Object(1,'success_updated');
+            $output = new BaseObject(1,'success_updated');
             $output->add('module_srl',$vars->module_srl);
             return $output;
         }
@@ -340,7 +340,7 @@
             $site_srl = Context::get('domain_srl');
             $skin = Context::get('skin');
 
-            if(!$site_srl) return new Object(-1,'msg_invalid_request');
+            if(!$site_srl) return new BaseObject(-1,'msg_invalid_request');
             $oModuleModel = &getModel('module');
             $site_info = $oModuleModel->getSiteInfo($site_srl);
             $module_srl = $site_info->index_module_srl;
@@ -459,10 +459,10 @@
 
             $site_srl = Context::get('site_srl');
             $module_srl = Context::get('module_srl');
-            if(!$module_srl) return new Object(-1,'msg_invalid_request');
+            if(!$module_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $oUpgletyle = new UpgletyleInfo($module_srl);
-            if($oUpgletyle->module_srl != $module_srl) return new Object(-1,'msg_invalid_request');
+            if($oUpgletyle->module_srl != $module_srl) return new BaseObject(-1,'msg_invalid_request');
             
 			$oModuleController = &getController('module');
             $output = $oModuleController->deleteModule($module_srl);
@@ -568,7 +568,7 @@
             $args->site_srl = $site_srl;
 
             $oUpgletyle = new UpgletyleInfo($module_srl);
-            if($oUpgletyle->module_srl != $module_srl) return new Object(-1,'msg_invalid_request');
+            if($oUpgletyle->module_srl != $module_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $oCounterController->deleteSiteCounterLogs($args->site_srl);
             $oAddonController->removeAddonConfig($args->site_srl);
@@ -626,7 +626,7 @@
             $doc->homepage = $member_info->homepage;
             $output = $oDocumentController->insertDocument($doc, true);
 
-            return new Object(1,'success_upgletyle_init');
+            return new BaseObject(1,'success_upgletyle_init');
         }
 
 		function exportUpgletyle($site_srl,$export_type='ttxml'){
@@ -655,7 +655,7 @@
 		function procUpgletyleAdminExport(){
 			$site_srl = Context::get('site_srl');
 			if(!$site_srl) $site_srl = $this->module_info->domain_srl;
-			if(!$site_srl) return new Object(-1,'msg_invalid_request');
+			if(!$site_srl) return new BaseObject(-1,'msg_invalid_request');
 			$export_type = Context::get('export_type');
 			if(!$export_type) $export_type = 'ttxml';
 			
@@ -674,7 +674,7 @@
 
 		function procUpgletyleAdminDeleteExportUpgletyle(){
 			$site_srl = Context::get('site_srl');
-			if(!$site_srl) return new Object(-1,'msg_invalid_request');
+			if(!$site_srl) return new BaseObject(-1,'msg_invalid_request');
 
 			$this->deleteExport($site_srl);
 		}

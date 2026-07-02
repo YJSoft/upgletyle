@@ -29,7 +29,7 @@
             if(isset($xmlDoc->methodresponse->fault)) {
                 $code = $xmlDoc->methodresponse->fault->value->struct->member[0]->value->int->body;
                 $message = $xmlDoc->methodresponse->fault->value->struct->member[1]->value->string->body;
-                return new Object($code, $message);
+                return new BaseObject($code, $message);
             }
 
 			$blogList = $xmlDoc->methodresponse->params->param->value->array->data->value;
@@ -64,9 +64,9 @@
 					}
 				}
 			}
-			else return new Object(-1, 'msg_invalid_request');
+			else return new BaseObject(-1, 'msg_invalid_request');
 
-			if(!is_array($val)) return new Object(-1,'msg_invalid_request');
+			if(!is_array($val)) return new BaseObject(-1,'msg_invalid_request');
 
 			foreach($val as $node){
 				if($node->name->body == 'url'){
@@ -78,7 +78,7 @@
 				}
 			}
 
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('url', $url);
             $output->add('blogid', $blogid);
             $output->add('name', $name);
@@ -156,7 +156,7 @@
             if(isset($xmlDoc->methodresponse->fault)) {
                 $code = $xmlDoc->methodresponse->fault->value->struct->member[0]->value->int->body;
                 $message = $xmlDoc->methodresponse->fault->value->struct->member[1]->value->string->body;
-                return new Object($code, $message);
+                return new BaseObject($code, $message);
             }
 
             $nodes = $xmlDoc->methodresponse->params->param->value->struct->member;
@@ -167,9 +167,9 @@
 				if($node->name->body == 'url') $target_file = $node->value->string->body?$node->value->string->body:$node->value->body;
 			}
 
-			if(!$target_file) return new Object(-1,'msg_not_uploaded');
+			if(!$target_file) return new BaseObject(-1,'msg_not_uploaded');
 
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('target_file',$target_file);
             return $output;
 
@@ -245,7 +245,7 @@
             if(isset($xmlDoc->methodresponse->fault)) {
                 $code = $xmlDoc->methodresponse->fault->value->struct->member[0]->value->int->body;
                 $message = $xmlDoc->methodresponse->fault->value->struct->member[1]->value->string->body;
-                return new Object($code, $message);
+                return new BaseObject($code, $message);
             }
 
             $postid = '';
@@ -258,7 +258,7 @@
                 $postid = sprintf('<i4>%s</i4>',$postid_node->i4->body);
             }
 
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('postid', $postid);
             return $output;
         }
@@ -331,9 +331,9 @@
             if(isset($xmlDoc->methodresponse->fault)) {
                 $code = $xmlDoc->methodresponse->fault->value->struct->member[0]->value->int->body;
                 $message = $xmlDoc->methodresponse->fault->value->struct->member[1]->value->string->body;
-                return new Object($code, $message);
+                return new BaseObject($code, $message);
             }
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('postid', $postid);
             return $output;
         }

@@ -47,7 +47,7 @@
 
             $oUpgletyleModel = &getModel('upgletyle');
 			$use_textyle = $oUpgletyleModel->moduleExistCheck('textyle');
-			if(!$use_textyle) return new Object(-1,'msg_invalid_request');
+			if(!$use_textyle) return new BaseObject(-1,'msg_invalid_request');
 
             $vars = Context::getRequestVars();
             $oTextyleModel = &getModel('textyle');

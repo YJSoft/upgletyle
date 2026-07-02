@@ -5,7 +5,7 @@
      * @brief  upgletyle module Upgletyle info class
      **/
 
-    class UpgletyleInfo extends Object {
+    class UpgletyleInfo extends BaseObject {
 
         var $domain_srl = null;
         var $domain = null;

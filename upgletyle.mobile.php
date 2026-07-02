@@ -193,9 +193,9 @@
 		function getUpgletyleCommentPage() {
 			$document_srl = Context::get('document_srl');
 			$oDocumentModel =& getModel('document');
-			if(!$document_srl) return new Object(-1, "msg_invalid_request");
+			if(!$document_srl) return new BaseObject(-1, "msg_invalid_request");
 			$oDocument = $oDocumentModel->getDocument($document_srl);
-			if(!$oDocument->isExists()) return new Object(-1, "msg_invalid_request");
+			if(!$oDocument->isExists()) return new BaseObject(-1, "msg_invalid_request");
 			Context::set('oDocument', $oDocument);
 			$oTemplate = new TemplateHandler;
 			$html = $oTemplate->compile($this->getTemplatePath(), "comment.html");
@@ -245,7 +245,7 @@
 
 		function procUpgletylePostWrite(){
 			$logged_info = Context::get('logged_info');
-			if(!$logged_info->is_site_admin) return new Object(-1,'msg_invalid_request');
+			if(!$logged_info->is_site_admin) return new BaseObject(-1,'msg_invalid_request');
 
 			$args = Context::getRequestVars();
 			$args->content = $args->content_text;

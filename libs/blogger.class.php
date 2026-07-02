@@ -28,11 +28,11 @@
             if(isset($xmlDoc->methodresponse->fault)) {
                 $code = $xmlDoc->methodresponse->fault->value->struct->member[0]->value->int->body;
                 $message = $xmlDoc->methodresponse->fault->value->struct->member[1]->value->string->body;
-                return new Object($code, $message);
+                return new BaseObject($code, $message);
             }
 
             $val = $xmlDoc->methodresponse->params->param->value->array->data->value->struct->member;
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('url', $val[0]->value->string->body?$val[0]->value->string->body:$val[0]->value->body);
             $output->add('blogid', $blogid = $val[1]->value->string->body?$val[1]->value->string->body:$val[1]->value->body);
             $output->add('name', $val[2]->value->string->body?$val[2]->value->string->body:$val[2]->value->body);
@@ -44,7 +44,7 @@
         }
 
         function newMediaObject($filename, $source_file) {
-            return new Object();
+            return new BaseObject();
         }
 
         function newPost($oDocument, $category = null) {
@@ -80,11 +80,11 @@
             if(isset($xmlDoc->methodresponse->fault)) {
                 $code = $xmlDoc->methodresponse->fault->value->struct->member[0]->value->int->body;
                 $message = $xmlDoc->methodresponse->fault->value->struct->member[1]->value->string->body;
-                return new Object($code, $message);
+                return new BaseObject($code, $message);
             }
             $postid = $xmlDoc->methodresponse->params->param->value->string->body;
             if(!$postid) $postid = $xmlDoc->methodresponse->params->param->value->i4->body;
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('postid', $postid);
             return $output;
         }
@@ -122,9 +122,9 @@
             if(isset($xmlDoc->methodresponse->fault)) {
                 $code = $xmlDoc->methodresponse->fault->value->struct->member[0]->value->int->body;
                 $message = $xmlDoc->methodresponse->fault->value->struct->member[1]->value->string->body;
-                return new Object($code, $message);
+                return new BaseObject($code, $message);
             }
-            $output = new Object();
+            $output = new BaseObject();
             $output->add('postid', $postid);
             return $output;
         }

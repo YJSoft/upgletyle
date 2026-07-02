@@ -57,7 +57,7 @@
 
 			if(!$oModule || !method_exists($oModule, $called_method))
 			{
-				return new Object();
+				return new BaseObject();
 			}
 			$output = $oModule->{$called_method}($obj);
 			if(is_object($output) && method_exists($output, 'toBool') && !$output->toBool())
@@ -66,11 +66,11 @@
 			}
 			elseif($output && !is_object($output)) 
 			{
-				$object = new Object();
+				$object = new BaseObject();
 				$object->add('compiled_widget',$output);
 				return $object;
 			}
-			return new Object();
+			return new BaseObject();
 		}
 
 
@@ -79,7 +79,7 @@
             $oModuleModel = &getModel('module');
             $oModuleController = &getController('module');
 
-            if(in_array(strtolower('dispUpgletyleToolConfigCommunication'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolConfigCommunication'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 			
             $args = Context::getRequestVars();
             $args->module_srl = $this->module_srl;
@@ -159,8 +159,8 @@
 			$credentials = $twitteroauth->get("account/verify_credentials");
             $error = $credentials->error;
             
-            if($error == '') return new Object(-1,'msg_success_to_twitter');
-            return new Object(-1,'msg_fail_to_twitter');
+            if($error == '') return new BaseObject(-1,'msg_success_to_twitter');
+            return new BaseObject(-1,'msg_fail_to_twitter');
         }
 
         function updateUpgletyleCommentEditor($module_srl, $comment_editor_skin, $comment_editor_colorset) {
@@ -197,7 +197,7 @@
         function procUpgletyleProfileUpdate(){
             $oMemberController = &getController('member');
 
-            if(in_array(strtolower('dispUpgletyleToolConfigProfile'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolConfigProfile'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             // nickname, email
             $args->member_srl = $this->upgletyle->member_srl;
@@ -244,7 +244,7 @@
             $oModuleModel = &getModel('module');
             $oUpgletyleModel = &getModel('upgletyle');
 
-            if(in_array(strtolower('dispUpgletyleToolConfigInfo'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolConfigInfo'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $args = Context::gets('upgletyle_title','upgletyle_content','permalink','permalink_userdefined','timezone');
 			if($args->permalink == 'permalink_userdefined') {
@@ -319,16 +319,16 @@
 			$oUpgletyleInfo = new UpgletyleInfo($this->upgletyle->upgletyle_srl);
 			if(!$oUpgletyleInfo->isEnableComment())
 			{
-				return new Object(-1, 'msg_not_permitted');
+				return new BaseObject(-1, 'msg_not_permitted');
 			}
 
-            if(!$this->grant->write_comment) return new Object(-1, 'msg_not_permitted');
+            if(!$this->grant->write_comment) return new BaseObject(-1, 'msg_not_permitted');
 
             $obj = Context::gets('document_srl','comment_srl','parent_srl','content','password','nick_name','member_srl','email_address','homepage','is_secret','notify_message');
             $obj->module_srl = $this->module_srl;
 
             $oDocument = $oDocumentModel->getDocument($obj->document_srl);
-            if(!$oDocument->isExists()) return new Object(-1,'msg_not_permitted');
+            if(!$oDocument->isExists()) return new BaseObject(-1,'msg_not_permitted');
 
             if(!$obj->comment_srl) $obj->comment_srl = getNextSequence();
             else $comment = $oCommentModel->getComment($obj->comment_srl, $this->grant->manager);
@@ -336,7 +336,7 @@
             if($comment->comment_srl != $obj->comment_srl) {
                 if($obj->parent_srl) {
                     $parent_comment = $oCommentModel->getComment($obj->parent_srl);
-                    if(!$parent_comment->comment_srl) return new Object(-1, 'msg_invalid_request');
+                    if(!$parent_comment->comment_srl) return new BaseObject(-1, 'msg_invalid_request');
 
                     $output = $oCommentController->insertComment($obj);
 
@@ -390,9 +390,9 @@
             if($comment_srl) {
                 $oCommentModel = &getModel('comment');
                 $oComment = $oCommentModel->getComment($comment_srl);
-                if(!$oComment->isExists()) return new Object(-1, 'msg_invalid_request');
+                if(!$oComment->isExists()) return new BaseObject(-1, 'msg_invalid_request');
 
-                if(!$oMemberModel->isValidPassword($oComment->get('password'),$password)) return new Object(-1, 'msg_invalid_password');
+                if(!$oMemberModel->isValidPassword($oComment->get('password'),$password)) return new BaseObject(-1, 'msg_invalid_password');
 
                 $oComment->setGrant();
             }
@@ -404,17 +404,17 @@
             $password = Context::get('password');
             $upgletyle_guestbook_srl = Context::get('upgletyle_guestbook_srl');
 
-            if(!$password || !$upgletyle_guestbook_srl) return new Object(-1, 'msg_invalid_request');
+            if(!$password || !$upgletyle_guestbook_srl) return new BaseObject(-1, 'msg_invalid_request');
 
             $output = $oUpgletyleModel->getUpgletyleGuestbook($upgletyle_guestbook_srl);
             if($output->data){
                 if($output->data[0]->password == md5($password)){
                     $this->addGuestbookGrant($upgletyle_guestbook_srl);
                 }else{
-                    return new Object(-1, 'msg_invalid_password');
+                    return new BaseObject(-1, 'msg_invalid_password');
                 }
             }else{
-                return new Object(-1, 'msg_invalid_request');
+                return new BaseObject(-1, 'msg_invalid_request');
             }
         }
 
@@ -486,7 +486,7 @@
         function procUpgletyleNotifyItemDelete(){
             $notified_srl = Context::get('notified_srl');
             $child_notified_srl = Context::get('child_notified_srl');
-            if(!$notified_srl && !$child_notified_srl) return new Object(-1,'msg_invalid_request');
+            if(!$notified_srl && !$child_notified_srl) return new BaseObject(-1,'msg_invalid_request');
             $oNotifyAdminController = &getAdminController('tccommentnotify');
             if($notified_srl)
             {
@@ -512,10 +512,10 @@
          **/
         function procUpgletyleGuestbookItemDelete(){
             $upgletyle_guestbook_srl = Context::get('upgletyle_guestbook_srl');
-            if(!$upgletyle_guestbook_srl) return new Object(-1,'msg_invalid_request');
+            if(!$upgletyle_guestbook_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $logged_info = Context::get('logged_info');
-            if(!($logged_info->is_site_admin || $_SESSION['own_textyle_guestbook'][$upgletyle_guestbook_srl])) return new Object(-1,'msg_not_permitted');
+            if(!($logged_info->is_site_admin || $_SESSION['own_textyle_guestbook'][$upgletyle_guestbook_srl])) return new BaseObject(-1,'msg_not_permitted');
             $output = $this->deleteGuestbookItem($upgletyle_guestbook_srl);
             return $output;
         }
@@ -527,11 +527,11 @@
             $oUpgletyleModel = &getModel('upgletyle');
 
             $upgletyle_guestbook_srl = Context::get('upgletyle_guestbook_srl');
-            if(!$upgletyle_guestbook_srl) return new Object(-1,'msg_invalid_request');
+            if(!$upgletyle_guestbook_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $upgletyle_guestbook_srl = explode(',',trim($upgletyle_guestbook_srl));
             rsort($upgletyle_guestbook_srl);
-            if(count($upgletyle_guestbook_srl)<1) return new Object(-1,'msg_invalid_request');
+            if(count($upgletyle_guestbook_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
             foreach($upgletyle_guestbook_srl as $k => $srl){
                 $output = $this->deleteGuestbookItem($srl);
@@ -544,7 +544,7 @@
             $output = $oUpgletyleModel->getUpgletyleGuestbook($upgletyle_guestbook_srl);
             $oGuest = $output->data;
 
-            if(!$oGuest) return new Object(-1,'msg_invalid_request');
+            if(!$oGuest) return new BaseObject(-1,'msg_invalid_request');
 
             // delete children
             $pobj->parent_srl = $upgletyle_guestbook_srl;
@@ -582,7 +582,7 @@
 
             if(preg_match('/^([0-9,]+)$/',$upgletyle_guestbook_srl)) $upgletyle_guestbook_srl = explode(',',$upgletyle_guestbook_srl);
             else $upgletyle_guestbook_srl = array($upgletyle_guestbook_srl);
-            if(count($upgletyle_guestbook_srl)<1) return new Object(-1,'error');
+            if(count($upgletyle_guestbook_srl)<1) return new BaseObject(-1,'error');
 
             $args->upgletyle_guestbook_srl = join(',',$upgletyle_guestbook_srl);
             $output = executeQuery('upgletyle.updateUpgletyleGuestbookItemsChangeSecret', $args);
@@ -595,9 +595,9 @@
         function procUpgletyleCommentItemDelete(){
             $comment_srl = Context::get('comment_srl');
 
-            if($comment_srl<1) return new Object(-1,'error');
+            if($comment_srl<1) return new BaseObject(-1,'error');
             $comment_srl = explode(',',trim($comment_srl));
-            if(count($comment_srl)<1) return new Object(-1,'msg_invalid_request');
+            if(count($comment_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
             $oCommentController = &getController('comment');
 
@@ -631,9 +631,9 @@
         function procUpgletyleTrackbackItemDelete(){
             $trackback_srl = Context::get('trackback_srl');
 
-            if($trackback_srl<1) return new Object(-1,'error');
+            if($trackback_srl<1) return new BaseObject(-1,'error');
             $trackback_srl = explode(',',trim($trackback_srl));
-            if(count($trackback_srl)<1) return new Object(-1,'msg_invalid_request');
+            if(count($trackback_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
             $oTrackbackController = &getController('trackback');
 
@@ -652,10 +652,10 @@
          * @brief deny insert
          **/
         function procUpgletyleDenyInsert(){
-            if(in_array(strtolower('dispUpgletyleToolCommunicationSpam'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolCommunicationSpam'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $var = Context::getRequestVars();
-            if(!$var->deny_type || !$var->deny_content) return new Object(-1,'msg_invalid_request');
+            if(!$var->deny_type || !$var->deny_content) return new BaseObject(-1,'msg_invalid_request');
 
             $args->module_srl = $this->module_srl;
             $args->deny_type = $var->deny_type;
@@ -696,7 +696,7 @@
         function insertDeny($obj){
             $oUpgletyleModel = &getModel('upgletyle');
             $check = $oUpgletyleModel->_checkDeny($obj->module_srl,$obj->deny_type,$obj->deny_content);
-            if($check) return new Object();
+            if($check) return new BaseObject();
 
             $this->deleteUpgletyleDenyFile($obj->module_srl);
             $args->textyle_deny_srl = getNextSequence();
@@ -713,7 +713,7 @@
          **/
         function procUpgletyleDenyDelete(){
             $s_args = Context::getRequestVars();
-            if(!$s_args->textyle_deny_srl) return new Object(-1,'msg_invalid_request');
+            if(!$s_args->textyle_deny_srl) return new BaseObject(-1,'msg_invalid_request');
             $this->deleteUpgletyleDenyFile($this->module_srl);
             $args->textyle_deny_srl = $s_args->textyle_deny_srl;
             $output = executeQuery('upgletyle.deleteUpgletyleDeny', $args);
@@ -965,7 +965,7 @@
             $oDocument = $oDocumentModel->getDocument($args->document_srl);
 			if(!$args->module_srl) $args->module_srl = $oDocument->get('module_srl');
             if(!$args->category_srl) $args->category_srl = $oDocument->get('category_srl');
-            if(!$oDocument->isExists()) return new Object(-1,'msg_invalid_request');
+            if(!$oDocument->isExists()) return new BaseObject(-1,'msg_invalid_request');
 
             $output = $oDocumentController->updateDocument($oDocument, $args);
             return $output;
@@ -996,18 +996,18 @@
 				{
 					$oTrashModel = &getModel('trash');
 					$output = $oTrashModel->getTrash($value);
-					if(!$output->toBool()) return new Object(-1, $output->message);
+					if(!$output->toBool()) return new BaseObject(-1, $output->message);
 
 					//class file check
 					$classPath = ModuleHandler::getModulePath($output->data->getOriginModule());
-					if(!is_dir(FileHandler::getRealPath($classPath))) return new Object(-1, 'not exist restore module directory');
+					if(!is_dir(FileHandler::getRealPath($classPath))) return new BaseObject(-1, 'not exist restore module directory');
 
 					$classFile = sprintf('%s%s.admin.controller.php', $classPath, $output->data->getOriginModule());
 					$classFile = FileHandler::getRealPath($classFile);
-					if(!file_exists($classFile)) return new Object(-1, 'not exist restore module class file');
+					if(!file_exists($classFile)) return new BaseObject(-1, 'not exist restore module class file');
 
 					$oAdminController = &getAdminController($output->data->getOriginModule());
-					if(!method_exists($oAdminController, 'restoreTrash')) return new Object(-1, 'not exist restore method in module class file');
+					if(!method_exists($oAdminController, 'restoreTrash')) return new BaseObject(-1, 'not exist restore method in module class file');
 
 					$originObject = unserialize($output->data->getSerializedObject());
 					$output = $oAdminController->restoreTrash($originObject);
@@ -1015,7 +1015,7 @@
 					if(!$output->toBool())
 					{
 						$oDB->rollback();
-						return new Object(-1, $output->message);
+						return new BaseObject(-1, $output->message);
 					}
 				}
 
@@ -1023,7 +1023,7 @@
 				$oTrashAdminController = &getAdminController('trash');
 				if(!$oTrashAdminController->_emptyTrash($trashSrlList)) {
 					$oDB->rollback();
-					return new Object(-1, $lang->fail_empty);
+					return new BaseObject(-1, $lang->fail_empty);
 				}
 				$oDB->commit();
 			}
@@ -1063,7 +1063,7 @@
 
                 $output = $oDocumentController->moveDocumentToTrash($args);
                 if(!$output->toBool()){
-                     return new Object(-1, 'fail_to_trash');
+                     return new BaseObject(-1, 'fail_to_trash');
                 }else{
                     $obj = $oDocument->getObjectVars();
                     $trigger_output = ModuleHandler::triggerCall('document.updateDocument', 'after', $obj);
@@ -1080,13 +1080,13 @@
                 $output = executeQuery('comment.updateCommentModule', $trash_args);
                 if(!$output->toBool()){
                     $oDB->rollback();
-                    return new Object(-1, 'fail_to_trash');
+                    return new BaseObject(-1, 'fail_to_trash');
                 }
 
                 $output = executeQuery('trackback.updateTrackbackModule', $trash_args);
                 if(!$output->toBool()){
                     $oDB->rollback();
-                    return new Object(-1, 'fail_to_trash');
+                    return new BaseObject(-1, 'fail_to_trash');
                 }
 
 
@@ -1158,14 +1158,14 @@
             $trash_srl = Context::get('trash_srl');
             if(preg_match('/^([0-9,]+)$/',$trash_srl)) $trashSrlList = explode(',',$trash_srl);
             else $trashSrlList = array($trash_srl);
-            if(count($trashSrlList)<1) return new Object(-1,'msg_invalid_request');
+            if(count($trashSrlList)<1) return new BaseObject(-1,'msg_invalid_request');
 
 			$oTrashAdminController = &getAdminController('trash');
 
 			//module relation data delete...
 			$output = $oTrashAdminController->_relationDataDelete(false, $trashSrlList);
-			if(!$output->toBool()) return new Object(-1, $output->message);
-			if(!$oTrashAdminController->_emptyTrash($trashSrlList)) return new Object(-1, $lang->fail_empty);
+			if(!$output->toBool()) return new BaseObject(-1, $output->message);
+			if(!$oTrashAdminController->_emptyTrash($trashSrlList)) return new BaseObject(-1, $lang->fail_empty);
 
             $this->setMessage('success_deleted');
         }
@@ -1180,7 +1180,7 @@
             $oDB->begin();
             for($i=0,$c=count($document_srl);$i<$c;$i++) {
                 $output = $oDocumentController->deleteDocument($document_srl[$i], $is_admin);
-                if(!$output->toBool()) return new Object(-1, 'fail_to_delete');
+                if(!$output->toBool()) return new BaseObject(-1, 'fail_to_delete');
             }
             $oDB->commit();
             return $output;
@@ -1188,8 +1188,8 @@
 
         function triggerInsertComment(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'upgletyle') return new Object();
-            if(!$obj->comment_srl) return new Object();
+            if($module_info->module != 'upgletyle') return new BaseObject();
+            if(!$obj->comment_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->nick_name;
@@ -1197,13 +1197,13 @@
             $args->homepage = $obj->homepage;
             $args->comment_count = 1;
             $this->updateUpgletyleSupporter($args);
-            return new Object();
+            return new BaseObject();
         }
 
         function triggerDeleteComment(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'upgletyle') return new Object();
-            if(!$obj->comment_srl) return new Object();
+            if($module_info->module != 'upgletyle') return new BaseObject();
+            if(!$obj->comment_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->nick_name;
@@ -1212,13 +1212,13 @@
             $args->comment_count = -1;
             $this->updateUpgletyleSupporter($args);
 
-            return new Object();
+            return new BaseObject();
         }
 
         function triggerInsertTrackback(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'upgletyle') return new Object();
-            if(!$obj->trackback_srl) return new Object();
+            if($module_info->module != 'upgletyle') return new BaseObject();
+            if(!$obj->trackback_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->blog_name;
@@ -1227,13 +1227,13 @@
             $args->trackback_count = 1;
             $this->updateUpgletyleSupporter($args);
 
-            return new Object();
+            return new BaseObject();
         }
 
         function triggerDeleteTrackback(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'upgletyle') return new Object();
-            if(!$obj->trackback_srl) return new Object();
+            if($module_info->module != 'upgletyle') return new BaseObject();
+            if(!$obj->trackback_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->blog_name;
@@ -1242,7 +1242,7 @@
             $args->trackback_count = -1;
             $this->updateUpgletyleSupporter($args);
 
-            return new Object();
+            return new BaseObject();
         }
 
         function updateUpgletyleSupporter($obj){
@@ -1286,7 +1286,7 @@
         function procUpgletylePostItemsCategoryMove(){
             $document_srl = Context::get('document_srl');
             $category_srl = Context::get('category_srl');
-            if(!$document_srl || !$category_srl) return new Object(-1,'msg_invalid_request');
+            if(!$document_srl || !$category_srl) return new BaseObject(-1,'msg_invalid_request');
 
             if(preg_match('/^([0-9,]+)$/',$document_srl)) $document_srl = explode(',',$document_srl);
             else $document_srl = array($document_srl);
@@ -1324,7 +1324,7 @@
         function procUpgletylePostItemsSetSecret(){
             $document_srl = Context::get('document_srl');
             $set_secret = Context::get('set_secret');
-            if(!$document_srl) return new Object(-1,'msg_invalid_request');
+            if(!$document_srl) return new BaseObject(-1,'msg_invalid_request');
             $set_secret = $set_secret=='Y'?'Y':'N';
 
             if(preg_match('/^([0-9,]+)$/',$document_srl)) $document_srl = explode(',',$document_srl);
@@ -1447,7 +1447,7 @@
             $oEditorModel = &getModel('editor');
             $oModuleController = &getController('module');
 
-            if(in_array(strtolower('dispUpgletyleToolConfigPostwrite'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolConfigPostwrite'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $vars = Context::getRequestVars();
 
@@ -1514,10 +1514,10 @@
         function procUpgletyleColorsetModify() {
             $oUpgletyleModel = &getModel('upgletyle');
             $myupgletyle = $oUpgletyleModel->getMemberUpgletyle();
-            if(!$myupgletyle->isExists()) return new Object(-1, 'msg_not_permitted');
+            if(!$myupgletyle->isExists()) return new BaseObject(-1, 'msg_not_permitted');
 
             $colorset = Context::get('colorset');
-            if(!$colorset) return new Object(-1,'msg_invalid_request');
+            if(!$colorset) return new BaseObject(-1,'msg_invalid_request');
 
             $this->updateUpgletyleColorset($myupgletyle->getModuleSrl(), $colorset);
 
@@ -1530,7 +1530,7 @@
          **/
         function procUpgletyleTagDelete(){
             $selected_tag = trim(Context::get('selected_tag'));
-            if(!$selected_tag) return new Object(-1,'msg_invalid_request');
+            if(!$selected_tag) return new BaseObject(-1,'msg_invalid_request');
 
             // get document_srl
             $args->tag = $selected_tag;
@@ -1559,7 +1559,7 @@
             $selected_tag = trim(Context::get('selected_tag'));
             $new_tag = trim(Context::get('tag'));
 
-            if(!$selected_tag || !$new_tag) return new Object(-1,'msg_invalid_request');
+            if(!$selected_tag || !$new_tag) return new BaseObject(-1,'msg_invalid_request');
 
             // get document_srl
             $args->tag = $selected_tag;
@@ -1645,10 +1645,10 @@
             $oModuleController = &getController('module');
             $oUpgletyleModel = &getModel('upgletyle');
 
-            if(in_array(strtolower('dispUpgletyleToolLayoutConfigSkin'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolLayoutConfigSkin'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $skin = Context::get('skin');
-            if(!is_dir($this->module_path.'skins/'.$skin)) return new Object();
+            if(!is_dir($this->module_path.'skins/'.$skin)) return new BaseObject();
 
             $module_info  = $oModuleModel->getModuleInfoByModuleSrl($this->module_srl);
             $module_info->skin = $skin;
@@ -1664,7 +1664,7 @@
             $oModuleController = &getController('module');
             $oUpgletyleModel = &getModel('upgletyle');
 
-            if(in_array(strtolower('dispUpgletyleToolLayoutConfigMobileSkin'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolLayoutConfigMobileSkin'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
             $mskin = Context::get('mskin');
 
 			$module_srls = array($this->module_srl);
@@ -1682,7 +1682,7 @@
 				$use_mobile = 'N';
 			}else{
 				$use_mobile = 'Y';
-				if($mskin && !is_dir($this->module_path.'m.skins/'.$mskin)) return new Object();
+				if($mskin && !is_dir($this->module_path.'m.skins/'.$mskin)) return new BaseObject();
 			}
 
 			foreach($module_srls as $module_srl){
@@ -1716,7 +1716,7 @@
 
 
         function procUpgletyleToolLayoutConfigEdit() {
-            if(in_array(strtolower('dispUpgletyleToolLayoutConfigEdit'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolLayoutConfigEdit'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $oUpgletyleModel = &getModel('upgletyle');
             $skin_path = $oUpgletyleModel->getUpgletylePath($this->module_srl);
@@ -1724,7 +1724,7 @@
             $skin_file_list = $oUpgletyleModel->getUpgletyleUserSkinFileList($this->module_srl);
             foreach($skin_file_list as $file){
                 $content = Context::get($file);
-                if($this->_checkDisabledFunction($content)) return new Object(-1,'msg_used_disabled_function');
+                if($this->_checkDisabledFunction($content)) return new BaseObject(-1,'msg_used_disabled_function');
                 FileHandler::writeFile($skin_path.$file, $content);
             }
         }
@@ -1767,7 +1767,7 @@
         }
 
          function procUpgletyleToolUserSkinExport(){
-            if(!$this->module_srl) return new Object('-1','msg_invalid_request');
+            if(!$this->module_srl) return new BaseObject('-1','msg_invalid_request');
 
             $oUpgletyleModel = &getModel('upgletyle');
             $skin_path = FileHandler::getRealPath($oUpgletyleModel->getUpgletylePath($this->module_srl));
@@ -1803,13 +1803,13 @@
 
          function procUpgletyleToolUserSkinImport(){
 
-            if(!$this->module_srl) return new Object('-1','msg_invalid_request');
+            if(!$this->module_srl) return new BaseObject('-1','msg_invalid_request');
 
             // check upload
-            if(!Context::isUploaded()) return new Object('-1','msg_invalid_request');
+            if(!Context::isUploaded()) return new BaseObject('-1','msg_invalid_request');
             $file = Context::get('file');
-            if(!is_uploaded_file($file['tmp_name'])) return new Object('-1','msg_invalid_request');
-            if(!preg_match('/\.(tar)$/i', $file['name'])) return new Object('-1','msg_invalid_request');
+            if(!is_uploaded_file($file['tmp_name'])) return new BaseObject('-1','msg_invalid_request');
+            if(!preg_match('/\.(tar)$/i', $file['name'])) return new BaseObject('-1','msg_invalid_request');
 
 
             $oUpgletyleModel = &getModel('upgletyle');
@@ -1820,7 +1820,7 @@
             FileHandler::removeDir($skin_path);
             FileHandler::makeDir($skin_path);
 
-            if(!move_uploaded_file($file['tmp_name'], $tar_file)) return new Object('-1','msg_invalid_request');
+            if(!move_uploaded_file($file['tmp_name'], $tar_file)) return new BaseObject('-1','msg_invalid_request');
 
             require_once(_XE_PATH_.'libs/tar.class.php');
 
@@ -1860,7 +1860,7 @@
 		function procUpgletyleWidgetConfigSave(){
 
 			$list_order_group = explode("|@|",Context::get('list_order'));
-			if(count($list_order_group) != 3) return new Object(-1, 'msg_invalid_request');
+			if(count($list_order_group) != 3) return new BaseObject(-1, 'msg_invalid_request');
 
 			$article_top = explode(",",$list_order_group[0]);
 			if(!is_array($article_top) || !$article_top) $article_top = array();
@@ -1950,7 +1950,7 @@
         function procUpgletyleEnableRss() {
             $oUpgletyleModel = &getModel('upgletyle');
             $myupgletyle = $oUpgletyleModel->getMemberUpgletyle();
-            if(!$myupgletyle->isExists()) return new Object(-1,'msg_not_permitted');
+            if(!$myupgletyle->isExists()) return new BaseObject(-1,'msg_not_permitted');
 
             $oRssAdminController = &getAdminController('rss');
             $oRssAdminController->setRssModuleConfig($myupgletyle->getModuleSrl(), 'Y');
@@ -1959,7 +1959,7 @@
         function procUpgletyleDisableRss() {
             $oUpgletyleModel = &getModel('upgletyle');
             $myupgletyle = $oUpgletyleModel->getMemberUpgletyle();
-            if(!$myupgletyle->isExists()) return new Object(-1,'msg_not_permitted');
+            if(!$myupgletyle->isExists()) return new BaseObject(-1,'msg_not_permitted');
 
             $oRssAdminController = &getAdminController('rss');
             $oRssAdminController->setRssModuleConfig($myupgletyle->getModuleSrl(), 'N');
@@ -2164,20 +2164,20 @@
          * @brief action forward apply layout
          **/
         function triggerApplyLayout(&$oModule) {
-            if(!$oModule || $oModule->getLayoutFile()=='popup_layout.html') return new Object();
+            if(!$oModule || $oModule->getLayoutFile()=='popup_layout.html') return new BaseObject();
 
-            if(Context::get('module')=='admin') return new Object();
+            if(Context::get('module')=='admin') return new BaseObject();
 
-            if(in_array(Context::getRequestMethod(),array('XMLRPC','JSON'))) return new Object();
+            if(in_array(Context::getRequestMethod(),array('XMLRPC','JSON'))) return new BaseObject();
 
-			if($oModule->act == 'dispMemberLogout') return new Object();
+			if($oModule->act == 'dispMemberLogout') return new BaseObject();
 
             $site_module_info = Context::get('site_module_info');
-            if(!$site_module_info || !($site_module_info->domain_srl ?? 0) || $site_module_info->mid != $this->upgletyle_mid) return new Object();
+            if(!$site_module_info || !($site_module_info->domain_srl ?? 0) || $site_module_info->mid != $this->upgletyle_mid) return new BaseObject();
 
             $oModuleModel = &getModel('module');
             $xml_info = $oModuleModel->getModuleActionXml('upgletyle');
-            if($oModule->mid == $this->upgletyle_mid && isset($xml_info->action->{$oModule->act})) return new Object();
+            if($oModule->mid == $this->upgletyle_mid && isset($xml_info->action->{$oModule->act})) return new BaseObject();
 
             $oUpgletyleModel = &getModel('upgletyle');
             $oUpgletyleView = &getView('upgletyle');
@@ -2193,7 +2193,7 @@
 				}
                 $oUpgletyleView->initService($oModule, true);
             }
-            return new Object();
+            return new BaseObject();
         }
 
         /**
@@ -2241,10 +2241,10 @@
             $oImporterAdminController = &getAdminController('importer');
             $oImporterAdminController->procImporterAdminPreProcessing();
 
-            if(in_array(strtolower('dispUpgletyleToolConfigData'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolConfigData'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $xml_file = Context::get('xml_file');
-            if(!$xml_file || $xml_file == 'http://') return new Object(-1,'msg_migration_file_is_null');
+            if(!$xml_file || $xml_file == 'http://') return new BaseObject(-1,'msg_migration_file_is_null');
 
             $this->setError($oImporterAdminController->getError());
             $this->setMessage($oImporterAdminController->getMessage());
@@ -2260,7 +2260,7 @@
         }
 
         function procUpgletyleInsertBlogApi() {
-            if(in_array(strtolower('dispUpgletyleToolConfigBlogApi'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispUpgletyleToolConfigBlogApi'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $msg = Context::getLang('msg_blogapi_registration');
             $vars = Context::getRequestVars();
@@ -2268,7 +2268,7 @@
             $vars->module_srl = $this->module_srl;
             $check_vars = array('blogapi_site_url', 'blogapi_site_title', 'blogapi_url', 'blogapi_user_id', 'blogapi_password');
             foreach($check_vars as $key => $val) {
-                if(!$vars->{$val}) return new Object(-1,$msg[$key]);
+                if(!$vars->{$val}) return new BaseObject(-1,$msg[$key]);
             }
             $output = $this->insertBlogApiService($vars);
             return $output;
@@ -2290,7 +2290,7 @@
             $vars->api_srl = Context::get('api_srl');
             $vars->module_srl = $this->module_srl;
             $output = executeQuery('upgletyle.getApiInfo',$vars);
-            if(!$output->data) return new Object(-1,'msg_invalid_request');
+            if(!$output->data) return new BaseObject(-1,'msg_invalid_request');
 
             if($output->data->enable == 'Y') $vars->enable = 'N';
             else $vars->enable = 'Y';
@@ -2303,7 +2303,7 @@
 
         function procUpgletyleDeleteBlogApi() {
             $api_srl = Context::get('api_srl');
-            if(!$api_srl) return new Object(-1,'msg_invalid_request');
+            if(!$api_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $output = $this->deleteBlogApi($this->module_srl,$api_srl);
             return $output;
@@ -2326,7 +2326,7 @@
 
 
         function procUpgletyleToolInit(){
-            if(!$this->domain_srl) return new Object(-1,'msg_invalid_request');
+            if(!$this->domain_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $oUpgletyleAdminController = &getAdminController('upgletyle');
             $output = $oUpgletyleAdminController->initUpgletyle($this->domain_srl);
@@ -2334,7 +2334,7 @@
         }
 
 		function procUpgletyleRequestExport(){
-            if(!$this->domain_srl) return new Object(-1,'msg_invalid_request');
+            if(!$this->domain_srl) return new BaseObject(-1,'msg_invalid_request');
 
 			$oUpgletyleAdminController = &getAdminController('upgletyle');
 			$oUpgletyleAdminController->deleteExport($this->domain_srl);
@@ -2365,10 +2365,10 @@
             if($args->insert_type == "module_page"){
             	$menu->type = 'module_page';
 				$module_type = Context::get('module_type');
-				if(!$menu_name || !$module_type || !$menu_mid) return new Object(-1,'msg_invalid_request');
+				if(!$menu_name || !$module_type || !$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 	
 				$module_count = $oModuleModel->getModuleCount($this->domain_srl, $module_type);
-				if($module_count >= $config->allow_service[$module_type]) return new Object(-1,'msg_module_count_exceed');
+				if($module_count >= $config->allow_service[$module_type]) return new BaseObject(-1,'msg_module_count_exceed');
 				$args->domain_srl = $this->domain_srl;
 				$args->mid = $menu_mid;
 				$args->browser_title = $menu_name;
@@ -2377,10 +2377,10 @@
 				if(!$output->toBool()) return $output;
             }else {
             	$menu->type = 'text_page';
-				if(!$menu_name || !$menu_mid) return new Object(-1,'msg_invalid_request');
+				if(!$menu_name || !$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 
 				$module_count = $oModuleModel->getModuleCount($this->domain_srl, 'page');
-				if($module_count >= $config->allow_service['page']) return new Object(-1,'msg_module_count_exceed');
+				if($module_count >= $config->allow_service['page']) return new BaseObject(-1,'msg_module_count_exceed');
 
 	            $output = $oDocumentController->insertDocument($args);
 
@@ -2405,13 +2405,13 @@
                     $args = Context::getRequestVars();
                     $menu_name = trim(Context::get('menu_name'));
                     $menu_mid= Context::get('menu_mid');
-                    if(!$menu_name || !$menu_mid) return new Object(-1,'msg_invalid_request');
+                    if(!$menu_name || !$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 
                     $oModuleModel = &getModel('module');
                     $oDocumentModel = &getModel('document');
                     $oDocumentController = &getController('document');
                     $module_info = $oModuleModel->getModuleInfoByMid($menu_mid);
-                    if(!$module_info) return new Object(-1,'msg_invalid_request');
+                    if(!$module_info) return new BaseObject(-1,'msg_invalid_request');
                     
                     $buff = trim($module_info->content);
                     $oXmlParser = new XmlParser();
@@ -2430,7 +2430,7 @@
 
 		function procUpgletyleToolExtraMenuDelete(){
             $menu_mid = Context::get('menu_mid');
-			if(!$menu_mid) return new Object(-1,'msg_invalid_request');
+			if(!$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 
             $oModuleModel = &getModel('module');
 			$oModuleController = &getController('module');
@@ -2444,7 +2444,7 @@
 
 		function procUpgletyleToolExtraMenuSort(){
 			$menu_mids = Context::get('menu_mids');
-			if(!$menu_mids) return new Object(-1,'msg_invalid_request');
+			if(!$menu_mids) return new BaseObject(-1,'msg_invalid_request');
 
 			$order = array();
 			$menu_mids = explode(',',$menu_mids);

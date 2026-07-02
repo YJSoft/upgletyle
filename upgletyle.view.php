@@ -417,10 +417,10 @@
             $oUpgletyleModel = &getModel('upgletyle');
 
             $document_srl = Context::get('document_srl');
-            if(!$document_srl) return new Object(-1,'msg_invalid_request');
+            if(!$document_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $oDocument = $oDocumentModel->getDocument($document_srl,false,false);
-            if(!$oDocument->isExists()) return new Object(-1,'msg_invalid_request');
+            if(!$oDocument->isExists()) return new BaseObject(-1,'msg_invalid_request');
 
             $alias = $oDocumentModel->getAlias($document_srl);
             Context::set('alias',$alias);
@@ -616,7 +616,7 @@
             $parent_srl = Context::get('comment_srl');
             $document_srl = Context::get('document_srl');
 
-            if(!$parent_srl) return new Object(-1, 'msg_invalid_request');
+            if(!$parent_srl) return new BaseObject(-1, 'msg_invalid_request');
 
             $oCommentModel = &getModel('comment');
             $oSourceComment = $oCommentModel->getComment($parent_srl);
@@ -1860,12 +1860,12 @@
 
             if (!$oDocument->isExists())
             {
-                return new Object(-1, 'msg_invalid_request');
+                return new BaseObject(-1, 'msg_invalid_request');
             }
 
             if (!$oDocument->allowComment())
             {
-                return new Object(-1, 'comments_disabled');
+                return new BaseObject(-1, 'comments_disabled');
             }
 
             Context::set('oDocument', $oDocument);
@@ -1894,7 +1894,7 @@
             // allow only logged in users to comment.
             if (!Context::get('is_logged'))
             {
-                return new Object(-1, 'login_to_modify_comment');
+                return new BaseObject(-1, 'login_to_modify_comment');
             }
 
             $comment_srl = Context::get('comment_srl');
@@ -1902,7 +1902,7 @@
             // ì§€ì •ë�œ ëŒ“ê¸€ì�´ ì—†ë‹¤ë©´ ì˜¤ë¥˜
             if (!$comment_srl)
             {
-                return new Object(-1, 'msg_invalid_request');
+                return new BaseObject(-1, 'msg_invalid_request');
             }
 
             // í•´ë‹¹ ëŒ“ê¸€ë¥¼ ì°¾ì•„ë³¸ë‹¤
@@ -1929,7 +1929,7 @@
 
             if (!$oComment->isGranted())
             {
-                return new Object(-1, 'no_rights_to_modify_comment');
+                return new BaseObject(-1, 'no_rights_to_modify_comment');
             }
 
             Context::set("module_info", $module_info);
@@ -1959,7 +1959,7 @@
             // ì§€ì •ë�œ ì›� ëŒ“ê¸€ì�´ ì—†ë‹¤ë©´ ì˜¤ë¥˜
             if (!$parent_srl)
             {
-                return new Object(-1, 'msg_invalid_request');
+                return new BaseObject(-1, 'msg_invalid_request');
             }
 
             // í•´ë‹¹ ëŒ“ê¸€ë¥¼ ì°¾ì•„ë³¸ë‹¤
@@ -1969,7 +1969,7 @@
             // ëŒ“ê¸€ì�´ ì—†ë‹¤ë©´ ì˜¤ë¥˜
             if (!$oSourceComment->isExists())
             {
-                return new Object(-1, 'msg_invalid_request');
+                return new BaseObject(-1, 'msg_invalid_request');
             }
 
             $oDocumentModel = &getModel("document");
@@ -1977,12 +1977,12 @@
 
             if (!$oDocument->isExists())
             {
-                return new Object(-1, 'msg_invalid_request');
+                return new BaseObject(-1, 'msg_invalid_request');
             }
 
             if (!$oDocument->allowComment())
             {
-                return new Object(-1, 'comments_disabled');
+                return new BaseObject(-1, 'comments_disabled');
             }
 
             // ëŒ€ìƒ� ëŒ“ê¸€ì�„ ìƒ�ì„±
@@ -2017,7 +2017,7 @@
             $parent_srl = Context::get('comment_srl');
             $document_srl = Context::get('document_srl');
 
-            if(!$parent_srl) return new Object(-1, 'msg_invalid_request');
+            if(!$parent_srl) return new BaseObject(-1, 'msg_invalid_request');
 
             $oCommentModel = &getModel('comment');
             $oSourceComment = $oCommentModel->getComment($parent_srl);
@@ -2043,7 +2043,7 @@
             $document_srl = Context::get('document_srl');
             $comment_srl = Context::get('comment_srl');
 
-            if(!$comment_srl) return new Object(-1, 'msg_invalid_request');
+            if(!$comment_srl) return new BaseObject(-1, 'msg_invalid_request');
 
             $oCommentModel = &getModel('comment');
             $oComment = $oCommentModel->getComment($comment_srl, $this->grant->manager);
@@ -2254,7 +2254,7 @@
 			if($menu_mid){
 				$oModuleModel = &getModel('module');
 				$module_info = $oModuleModel->getModuleInfoByMid($menu_mid);
-				if(!$module_info) return new Object(-1,'msg_invalid_request');
+				if(!$module_info) return new BaseObject(-1,'msg_invalid_request');
 
 				$args->module_srl = $module_info->module_srl;
 				$output = executeQuery('upgletyle.getExtraMenu',$args);
@@ -2293,7 +2293,7 @@
             if($menu_mid){
                 $oModuleModel = &getModel('module');
                 $module_info = $oModuleModel->getModuleInfoByMid($menu_mid);
-                if(!$module_info) return new Object(-1,'msg_invalid_request');
+                if(!$module_info) return new BaseObject(-1,'msg_invalid_request');
                 
                 $oWidgetController = &getController('widget');
                 $buff = trim($module_info->content);

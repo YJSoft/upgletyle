@@ -40,9 +40,9 @@
 
             $msg_lang = Context::getLang('msg_blogapi_registration');
 
-            if(!$user_id) return new Object(-1,$msg_lang[3]);
-            if(!$password ) return new Object(-1,$msg_lang[4]);
-            if(!$url) return new Object(-1,$msg_lang[2]);
+            if(!$user_id) return new BaseObject(-1,$msg_lang[3]);
+            if(!$password ) return new BaseObject(-1,$msg_lang[4]);
+            if(!$url) return new BaseObject(-1,$msg_lang[2]);
 
             switch($type) {
                 case 'blogger' :

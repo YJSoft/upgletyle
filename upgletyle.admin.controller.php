@@ -360,6 +360,7 @@
 				else $upgletyle_data = $output->data;
 
 				unset($args);
+            $args = new stdClass();
 				$args->textyle_title = $upgletyle_data->upgletyle_title;
 				$args->textyle_content = $upgletyle_data->upgletyle_content;
 				$args->profile_content = $upgletyle_data->profile_content;
@@ -386,11 +387,13 @@
 				if(!$output->toBool()) return $output;
 
 				unset($args);
+            $args = new stdClass();
 				$args->module_srl = $module_srl;
 				$output = executeQuery('upgletyle.deleteUpgletyle', $args);
 				if(!$output->toBool()) return $output;
 
 				unset($args);
+            $args = new stdClass();
 				$args->mid = 'textyle';
 				$args->module = 'textyle';
 			}
@@ -403,6 +406,7 @@
 				else $textyle_data = $output->data;
 
 				unset($args);
+            $args = new stdClass();
 				$args->upgletyle_title = $textyle_data->textyle_title;
 				$args->upgletyle_content = $textyle_data->textyle_content;
 				$args->profile_content = $textyle_data->profile_content;
@@ -429,11 +433,13 @@
 				if(!$output->toBool()) return $output;
 
 				unset($args);
+            $args = new stdClass();
 				$args->module_srl = $module_srl;
 				$output = executeQuery('textyle.deleteTextyle', $args);
 				if(!$output->toBool()) return $output;
 
 				unset($args);
+            $args = new stdClass();
 				$args->mid = 'upgletyle';
 				$args->module = 'upgletyle';
 			}

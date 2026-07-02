@@ -289,6 +289,7 @@
 
 
             unset($args);
+			$args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->page = 1;
             $args->list_count = 5;
@@ -580,6 +581,7 @@
             Context::set('tag_recent_list',$output->data);
 
             unset($args);
+            $args = new stdClass();
             $args->tag = Context::get('selected_tag');
             if($args->tag){
                 $args->module_srl = $this->module_srl;
@@ -1132,6 +1134,7 @@
                     if(!file_exists($small_screenshot)) $small_screenshot = $this->module_path.'tpl/img/@small.jpg';
 
                     unset($obj);
+            $obj = new stdClass();
                     $obj->title = $info->title;
                     $obj->description = $info->description;
                     $_arr_author = array();
@@ -1165,6 +1168,7 @@
                     if(!file_exists($small_screenshot)) $small_screenshot = $this->module_path.'tpl/img/@small.jpg';
 
                     unset($obj);
+            $obj = new stdClass();
                     $obj->title = $info->title;
                     $obj->description = $info->description;
                     $_arr_author = array();

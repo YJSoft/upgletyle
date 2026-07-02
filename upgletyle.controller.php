@@ -689,6 +689,7 @@
                 foreach($contents as $k => $content){
                     if(!trim($content)) continue;
                     unset($args);
+            $args = new stdClass();
                     $args->textyle_deny_srl = getNextSequence();
                     $args->module_srl = $this->module_srl;
                     $args->deny_type = $type;
@@ -1067,6 +1068,7 @@
 
             for($i=0,$c=count($document_srls);$i<$c;$i++) {
                 unset($args);
+            $args = new stdClass();
                 $args->document_srl = $document_srls[$i];
                 $oDocument = $oDocumentModel->getDocument($args->document_srl);
 
@@ -1093,6 +1095,7 @@
 
                 // TO DO : move DocumentController
                 unset($trash_args);
+            $trash_args = new stdClass();
                 $trash_args->document_srls = $document_srls[$i];
                 $trash_args->module_srl = 0;
                 $output = executeQuery('comment.updateCommentModule', $trash_args);
@@ -1649,6 +1652,7 @@
             }
 
             unset($args);
+            $args = new stdClass();
             for($i=0,$c=count($document_srls);$i<$c;$i++){
                 $args->document_srl = $document_srls[$i];
                 if(is_array($tags[$args->document_srl])) $args->tags = join(',',$tags[$args->document_srl]);

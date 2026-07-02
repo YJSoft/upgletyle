@@ -2039,6 +2039,17 @@
 			$this->_redirectToPermalink($obj);
 		}
 
+		/**
+		 * @brief true if $url points at the exact page currently being requested
+		 * (used to avoid issuing a redirect that just sends the browser back to
+		 * the same URL, which would loop forever)
+		 **/
+		private function _isCurrentRequestUrl($url) {
+			$target_path = parse_url($url, PHP_URL_PATH);
+			$current_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+			return $target_path !== null && $target_path === $current_path;
+		}
+
 		private function _getRequestUriPermalinkType() {
 
 			$regexs = array(
@@ -2112,26 +2123,28 @@
 			switch($oUpgletyle->getPermalinkType())
 			{
 				//Userdefined (http://localhost/userdefined/12345)
-				case 'userdefined' : 
+				case 'userdefined' :
 					$permalink = $oUpgletyle->getUserdefinedPermalink();
-					if($requested_permalink_type != 'userdefined' || $obj->mid != $permalink)
+					$target_url = getUrl('', 'mid', $permalink, 'document_srl', $obj->document_srl);
+					if(($requested_permalink_type != 'userdefined' || $obj->mid != $permalink) && !$this->_isCurrentRequestUrl($target_url))
 					{
-						header('location:' . getUrl('', 'mid', $permalink, 'document_srl', $obj->document_srl));
+						header('location:' . $target_url);
 						Context::close();
-						exit;						
+						exit;
 					}
 					break;
 
 				//Default (http://localhost/12345)
 				case 'default' :
-					if($requested_permalink_type != 'default') 
+					$target_url = getUrl('', 'document_srl', $obj->document_srl);
+					if($requested_permalink_type != 'default' && !$this->_isCurrentRequestUrl($target_url))
 					{
-						header('location:' . getUrl('', 'document_srl', $obj->document_srl));
+						header('location:' . $target_url);
 						Context::close();
 						exit;
 					}
 					break;
-				
+
 				//Fulldate (http://local/2014/01/15/DocumentEntry)
 				case 'fulldate' :
 					$oUpgletyleModel = getModel('upgletyle');
@@ -2146,9 +2159,13 @@
 						$args->p_day = $document_info->getRegdate('d');
 						$args->entry = $entry;
 
-						header('location:' . $oUpgletyleModel->getPermalinkUrl('fulldate',$args));
-	 					Context::close();
-						exit;
+						$target_url = $oUpgletyleModel->getPermalinkUrl('fulldate',$args);
+						if(!$this->_isCurrentRequestUrl($target_url))
+						{
+							header('location:' . $target_url);
+							Context::close();
+							exit;
+						}
 					}
 					break;
 
@@ -2165,10 +2182,14 @@
 						$args->p_month = $document_info->getRegdate('m');
 						$args->entry = $entry;
 
-						header('location:' . $oUpgletyleModel->getPermalinkUrl('shortdate',$args));
-	 					Context::close();
-						exit;
-						
+						$target_url = $oUpgletyleModel->getPermalinkUrl('shortdate',$args);
+						if(!$this->_isCurrentRequestUrl($target_url))
+						{
+							header('location:' . $target_url);
+							Context::close();
+							exit;
+						}
+
 					}
 					break;
 			}

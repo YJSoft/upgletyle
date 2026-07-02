@@ -5,7 +5,7 @@
         var $password = null;
         var $blogid = null;
 
-        function metaWebLog($url, $user_id = null, $password = null, $blogid = null) {
+        function __construct($url, $user_id = null, $password = null, $blogid = null) {
             if(!preg_match('/^(http|https)/i',$url)) $url = 'http://'.$url;
             $this->url = $url;
             $this->user_id = $user_id;

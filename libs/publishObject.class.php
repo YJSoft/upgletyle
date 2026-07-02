@@ -11,7 +11,7 @@
         var $publish_twitter = false; // true/false
         var $published_twitter = false; // true/false
 
-        function publishObject($module_srl, $document_srl = 0) {
+        function __construct($module_srl, $document_srl = 0) {
             $args = new stdClass();
 
             $this->module_srl = $module_srl;

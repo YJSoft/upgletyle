@@ -160,7 +160,7 @@ class ExportUpgletyle{
 
 class TTXMLExport extends ExportUpgletyle{
 
-	function TTXMLExport($export_file){
+	function __construct($export_file){
 		parent::UpgletyleExportObject($export_file);
 		$this->_write('<?xml version="1.0" encoding="utf-8" ?>'."\r\n".'<blog type="tattertools/1.0" migrational="false">'."\r\n");
 	}

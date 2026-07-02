@@ -16,7 +16,7 @@
         var $colorset = null;
         var $timezone = null;
 
-        function UpgletyleInfo($upgletyle_srl = 0) {
+        function __construct($upgletyle_srl = 0) {
             if(!$upgletyle_srl) return;
             $this->setUpgletyle($upgletyle_srl);
         }

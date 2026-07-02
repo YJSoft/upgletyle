@@ -140,6 +140,7 @@
         function publish() {
             $oUpgletyleModel = &getModel('upgletyle');
             $oUpgletyleController = &getController('upgletyle');
+            // the trackback module was removed from Rhymix (and XE before it) due to spam abuse
             $oTrackbackController = &getController('trackback');
 
             if(!$this->oDocument->isExists()) return;
@@ -152,7 +153,7 @@
 				return $triggerOutput;
 			}
 
-            if(count($this->trackbacks)) {
+            if($oTrackbackController && count($this->trackbacks)) {
                 foreach($this->trackbacks as $trackback_url => $val) {
                     $output = $oTrackbackController->sendTrackback($this->oDocument, $trackback_url, $val->charset);
 					if($output->toBool()) {

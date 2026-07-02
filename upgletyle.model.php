@@ -415,7 +415,9 @@
         }
 
         function getTrackbackUrl($domain,$document_srl){
+            // the trackback module was removed from Rhymix (and XE before it) due to spam abuse
             $oTrackbackModel = &getModel('trackback');
+            if(!$oTrackbackModel) return '';
             $key = $oTrackbackModel->getTrackbackKey($document_srl);
 
             return getFullSiteUrl($domain,'','document_srl',$document_srl,'key',$key,'act','trackback');

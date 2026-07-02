@@ -643,7 +643,9 @@
             $trackback_srl = explode(',',trim($trackback_srl));
             if(count($trackback_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
+            // the trackback module was removed from Rhymix (and XE before it) due to spam abuse
             $oTrackbackController = &getController('trackback');
+            if(!$oTrackbackController) return new BaseObject(-1,'msg_invalid_request');
 
             for($i=0,$c=count($trackback_srl);$i<$c;$i++){
                 $output = $oTrackbackController->deleteTrackback($trackback_srl[$i], $this->grant->manager);
@@ -815,7 +817,9 @@
                 }
                 $oPublish = $oUpgletyleModel->getPublishObject($this->module_srl, $document_srl);
                 $oPublish->trackbacks = array();
-                
+                $publish_option->trackbacks = array();
+                $publish_option->blogapis = array();
+
                 foreach($var as $key => $val) {
                     if(preg_match('/^trackback_(url|charset)([0-9]*)$/i', $key, $match)&&$val) $publish_option->trackbacks[(int)$match[2]][$match[1]] = $val;
                     else if(preg_match('/^blogapi_([0-9]+)$/i', $key, $match) && $val=='Y') $publish_option->blogapis[$match[1]]->send_api = true;
@@ -918,6 +922,8 @@
 
             $oPublish = $oUpgletyleModel->getPublishObject($this->module_srl, $var->document_srl);
             $oPublish->trackbacks = array();
+            $publish_option->trackbacks = array();
+            $publish_option->blogapis = array();
 
             foreach($var as $key => $val) {
                 if(preg_match('/^trackback_(url|charset)([0-9]*)$/i', $key, $match)&&$val) $publish_option->trackbacks[(int)$match[2]][$match[1]] = $val;

@@ -573,6 +573,7 @@
             $oTagController = &getController('tag');
             $oAddonController = &getController('addon');
             $oEditorController = &getController('editor');
+            // the trackback module was removed from Rhymix (and XE before it) due to spam abuse
             $oTrackbackController = &getController('trackback');
             $oModuleModel = &getModel('module');
             $oUpgletyleModel = &getModel('upgletyle');
@@ -606,7 +607,7 @@
             $output = $oDocumentController->triggerDeleteModuleDocuments($args);
             $output = $oCommentController->triggerDeleteModuleComments($args);
             $output = $oTagController->triggerDeleteModuleTags($args);
-            $output = $oTrackbackController->triggerDeleteModuleTrackbacks($args);
+            if($oTrackbackController) $output = $oTrackbackController->triggerDeleteModuleTrackbacks($args);
             $args->module_srl = $args->module_srl *-1;
 
             $output = $oDocumentController->triggerDeleteModuleDocuments($args);

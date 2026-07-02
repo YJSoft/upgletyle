@@ -299,7 +299,9 @@
 
         function getTrackbackAllCount($flag=1){
             if(!$this->isExists()) return;
+            // the trackback module was removed from Rhymix (and XE before it) due to spam abuse
             $oTrackbackModel = &getModel('trackback');
+            if(!$oTrackbackModel) return 0;
             return $oTrackbackModel->getTrackbackAllCount($this->module_srl*$flag);
         }
 

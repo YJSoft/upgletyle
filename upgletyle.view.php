@@ -708,8 +708,15 @@
             $args->search_target = Context::get('search_target');
             $args->search_keyword = Context::get('search_keyword');
 
+            // the trackback module was removed from Rhymix (and XE before it) due to spam abuse
             $oTrackbackAdminModel = &getAdminModel('trackback');
-            $output = $oTrackbackAdminModel->getTotalTrackbackList($args);
+            if($oTrackbackAdminModel) {
+                $output = $oTrackbackAdminModel->getTotalTrackbackList($args);
+            } else {
+                $output = new stdClass();
+                $output->data = array();
+                $output->page_navigation = null;
+            }
 
             $document_srl = array();
             if(count($output->data)>0){

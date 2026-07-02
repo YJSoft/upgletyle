@@ -17,16 +17,8 @@
 
             $oUpgletyleModel = &getModel('upgletyle');
             if(preg_match("/UpgletyleTool/",$this->act) || $oUpgletyleModel->isAttachedMenu($this->act) ) {
-				if(__DEBUG__)
-				{
-					Context::loadFile(array('./modules/admin/tpl/js/jquery.tmpl.js', '', '', 1), true);
-					Context::loadFile(array('./modules/admin/tpl/js/jquery.jstree.js', '', '', 1), true);
-				} 
-				else
-				{
-					Context::loadFile(array('./modules/admin/tpl/js/jquery.tmpl.js', '', '', 1), true);
-					Context::loadFile(array('./modules/admin/tpl/js/jquery.jstree.js', '', '', 1), true);
-				}
+				Context::loadFile(array('./modules/admin/tpl/js/jquery.tmpl.js', '', '', 1), true);
+				Context::loadFile(array('./modules/admin/tpl/js/jquery.jstree.js', '', '', 1), true);
                 $this->initTool($this);
 
             } else {

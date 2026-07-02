@@ -1145,7 +1145,7 @@
                     $obj->title = $info->title;
                     $obj->description = $info->description;
                     $_arr_author = array();
-                    for($i=0,$c=count($info->author);$i<$c;$i++) {
+                    for($i=0,$c=count($info->author ?: array());$i<$c;$i++) {
                         $name =  $info->author[$i]->name;
                         $homepage = $info->author[$i]->homepage;
                         if($homepage) $_arr_author[] = '<a href="'.$homepage.'">'.$name.'</a>';
@@ -1179,7 +1179,7 @@
                     $obj->title = $info->title;
                     $obj->description = $info->description;
                     $_arr_author = array();
-                    for($i=0,$c=count($info->author);$i<$c;$i++) {
+                    for($i=0,$c=count($info->author ?: array());$i<$c;$i++) {
                         $name =  $info->author[$i]->name;
                         $homepage = $info->author[$i]->homepage;
                         if($homepage) $_arr_author[] = '<a href="'.$homepage.'">'.$name.'</a>';

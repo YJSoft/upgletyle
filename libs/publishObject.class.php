@@ -12,6 +12,7 @@
         var $published_twitter = false; // true/false
 
         function publishObject($module_srl, $document_srl = 0) {
+            $args = new stdClass();
 
             $this->module_srl = $module_srl;
             $this->document_srl = $document_srl;
@@ -69,6 +70,7 @@
         }
 
         function getApis() {
+            $args = new stdClass();
             if(!$this->oDocument->isExists()) return array();
 
             $args->module_srl = $this->module_srl;
@@ -121,6 +123,8 @@
         }
 
         function save() {
+            $logs = new stdClass();
+            $args = new stdClass();
             $logs->trackbacks = array_merge($this->trackbacks_org, $this->trackbacks);
             $logs->blogapis = $this->blogapis;
             $logs->publish_twitter = $this->publish_twitter;
@@ -190,6 +194,7 @@
 
 
         function sendBlogApi($api, $category) {
+            $args = new stdClass();
             if(!$this->oDocument->isExists()) return;
             switch($api->blogapi_type) {
                 case 'blogger' :

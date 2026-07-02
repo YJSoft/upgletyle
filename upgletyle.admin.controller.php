@@ -47,6 +47,10 @@
         }
 
         function insertUpgletyle($domain, $user_id_list, $settings = null) {
+            $upgletyle = new stdClass();
+            $args = new stdClass();
+            $obj = new stdClass();
+            $doc = new stdClass();
             if(!is_array($user_id_list)) $user_id_list = array($user_id_list);
 
             $oMemberModel = &getModel('member');
@@ -337,6 +341,7 @@
         }
 
         function procUpgletyleAdminSwitch() {
+            $args = new stdClass();
             $site_srl = Context::get('domain_srl');
             $skin = Context::get('skin');
 
@@ -546,12 +551,16 @@
         }
 
         function procUpgletyleAdminDeleteBlogApiServices(){
+            $args = new stdClass();
             $args->textyle_blogapi_services_srl = Context::get('textyle_blogapi_services_srl');
             $output = executeQuery('upgletyle.deleteBlogApiService',$args);
             return $output;
         }
 
         function initUpgletyle($site_srl){
+            $args = new stdClass();
+            $obj = new stdClass();
+            $doc = new stdClass();
             $oCounterController = &getController('counter');
             $oDocumentController = &getController('document');
             $oCommentController = &getController('comment');
@@ -630,6 +639,7 @@
         }
 
 		function exportUpgletyle($site_srl,$export_type='ttxml'){
+            $args = new stdClass();
             require_once($this->module_path.'libs/exportUpgletyle.php');
 			//$this->deleteExport($site_srl);
 
@@ -653,6 +663,7 @@
 		}
 
 		function procUpgletyleAdminExport(){
+			$args = new stdClass();
 			$site_srl = Context::get('site_srl');
 			if(!$site_srl) $site_srl = $this->module_info->domain_srl;
 			if(!$site_srl) return new BaseObject(-1,'msg_invalid_request');
@@ -680,6 +691,7 @@
 		}
 
 		function deleteExport($site_srl){
+			$args = new stdClass();
 			$args->site_srl = $site_srl;
 			$output = executeQuery('upgletyle.getExport',$args);
 

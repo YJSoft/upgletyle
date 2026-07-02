@@ -75,6 +75,7 @@
 
 
         function procUpgletyleConfigCommunicationInsert(){
+        	$comment_config = new stdClass();
         	$logged_info = Context::get('logged_info');
             $oModuleModel = &getModel('module');
             $oModuleController = &getController('module');
@@ -195,6 +196,8 @@
         }
 
         function procUpgletyleProfileUpdate(){
+            $args = new stdClass();
+            $tex = new stdClass();
             $oMemberController = &getController('member');
 
             if(in_array(strtolower('dispUpgletyleToolConfigProfile'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
@@ -427,6 +430,7 @@
          * @brief Guestbook insert
          **/
         function procUpgletyleGuestbookWrite(){
+            $obj = new stdClass();
             $val = Context::gets('mid','nick_name','homepage','email_address','password','content','parent_srl','upgletyle_guestbook_srl','page','is_secret');
 
             // set
@@ -540,6 +544,8 @@
         }
 
         function deleteGuestbookItem($upgletyle_guestbook_srl){
+            $pobj = new stdClass();
+            $obj = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
             $output = $oUpgletyleModel->getUpgletyleGuestbook($upgletyle_guestbook_srl);
             $oGuest = $output->data;
@@ -577,6 +583,7 @@
          * @brief Guestbook secret on/off
          **/
         function procUpgletyleGuestbookItemsChangeSecret(){
+            $args = new stdClass();
             $s_args = Context::getRequestVars();
             $upgletyle_guestbook_srl = $s_args->upgletyle_guestbook_srl;
 
@@ -613,6 +620,7 @@
         }
 
         function procUpgletyleCommentItemSetSecret(){
+            $args = new stdClass();
             $is_secret = Context::get('is_secret');
             $args->is_secret = $is_secret =='Y' ? 'Y' : 'N';
 
@@ -652,6 +660,7 @@
          * @brief deny insert
          **/
         function procUpgletyleDenyInsert(){
+            $args = new stdClass();
             if(in_array(strtolower('dispUpgletyleToolCommunicationSpam'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $var = Context::getRequestVars();
@@ -667,6 +676,7 @@
          * @brief deny insert
          **/
         function procUpgletyleDenyInsertList(){
+            $args = new stdClass();
             $var = Context::getRequestVars();
             $deny = array();
             $deny['S'] = explode('|',$var->homepage);
@@ -694,6 +704,7 @@
         }
 
         function insertDeny($obj){
+            $args = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
             $check = $oUpgletyleModel->_checkDeny($obj->module_srl,$obj->deny_type,$obj->deny_content);
             if($check) return new BaseObject();
@@ -712,6 +723,7 @@
          * @brief deny delete
          **/
         function procUpgletyleDenyDelete(){
+            $args = new stdClass();
             $s_args = Context::getRequestVars();
             if(!$s_args->textyle_deny_srl) return new BaseObject(-1,'msg_invalid_request');
             $this->deleteUpgletyleDenyFile($this->module_srl);
@@ -728,6 +740,8 @@
 		
 		//글쓰기 화면에서 저장, 미리보기, 발행 눌렀을때
         function procUpgletylePostsave(){
+            $args = new stdClass();
+            $publish_option = new stdClass();
 
             $oDocumentModel = &getModel('document');
             $oDocumentController = &getController('document');
@@ -862,6 +876,8 @@
         }
 
         function procUpgletylePostPublish() {
+            $args = new stdClass();
+            $publish_option = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
             $oDocumentModel = &getModel('document');
             $oDocumentController = &getController('document');
@@ -1035,6 +1051,8 @@
 
 
         function procUpgletylePostTrash(){
+            $args = new stdClass();
+            $trash_args = new stdClass();
             $document_srl = Context::get('document_srl');
 
             if(preg_match('/^([0-9,]+)$/',$document_srl)) $document_srls = explode(',',$document_srl);
@@ -1098,6 +1116,7 @@
         }
 
 		function procUpgletylePostSettingToggle(){
+            $args = new stdClass();
             $document_srl = Context::get('document_srl');
             $type = Context::get('type');
 			
@@ -1130,6 +1149,7 @@
 		}
 
         function deletePostSubscription($document_srl){
+            $args = new stdClass();
             $args->document_srl = $document_srl;
             $output = executeQuery('upgletyle.deleteUpgletyleSubscriptionByDocumentSrl', $args);
 
@@ -1140,6 +1160,7 @@
         }
 
         function syncUpgletyleSubscriptionDate($module_srl){
+            $args = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
             $output = $oUpgletyleModel->getSubscriptionMinPublishDate($module_srl);
 
@@ -1187,6 +1208,7 @@
         }
 
         function triggerInsertComment(&$obj){
+            $args = new stdClass();
             $module_info = Context::get('module_info');
             if($module_info->module != 'upgletyle') return new BaseObject();
             if(!$obj->comment_srl) return new BaseObject();
@@ -1201,6 +1223,7 @@
         }
 
         function triggerDeleteComment(&$obj){
+            $args = new stdClass();
             $module_info = Context::get('module_info');
             if($module_info->module != 'upgletyle') return new BaseObject();
             if(!$obj->comment_srl) return new BaseObject();
@@ -1216,6 +1239,7 @@
         }
 
         function triggerInsertTrackback(&$obj){
+            $args = new stdClass();
             $module_info = Context::get('module_info');
             if($module_info->module != 'upgletyle') return new BaseObject();
             if(!$obj->trackback_srl) return new BaseObject();
@@ -1231,6 +1255,7 @@
         }
 
         function triggerDeleteTrackback(&$obj){
+            $args = new stdClass();
             $module_info = Context::get('module_info');
             if($module_info->module != 'upgletyle') return new BaseObject();
             if(!$obj->trackback_srl) return new BaseObject();
@@ -1246,6 +1271,7 @@
         }
 
         function updateUpgletyleSupporter($obj){
+            $args = new stdClass();
             $oMemberModel = &getModel('member');
 
             $args->module_srl = $obj->module_srl;
@@ -1375,6 +1401,7 @@
         }
 
         function procUpgletylePostItemsAllowCommentTrackback(){
+            $args = new stdClass();
             $var = Context::getRequestVars();
             $allow_comment = $var->allow_comment!='Y'?'N':'Y';
             $allow_trackback = $var->allow_trackback!='Y'?'N':'Y';
@@ -1396,6 +1423,7 @@
          * @brief publish subscripted post 
          **/
         function publishSubscriptedPost($module_srl){
+            $args = new stdClass();
             $now = date('YmdHis');
             $oUpgletyleModel = &getModel('upgletyle');
 
@@ -1420,6 +1448,7 @@
         }
 
         function _updatePublishPost($document_srl,$publish_date,$module_srl){
+            $args = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
 
             $args->module_srl = $module_srl;
@@ -1436,6 +1465,7 @@
         }
 
         function _deleteSubscription($module_srl,$less_publish_date){
+            $args = new stdClass();
             $args->module_srl = $module_srl;
             $args->publish_date = $less_publish_date;
             $output = executeQuery('upgletyle.deleteUpgletyleSubscriptionByPublishDate',$args);
@@ -1444,6 +1474,7 @@
         }
 
         function procUpgletyleConfigPostwriteInsert(){
+            $args = new stdClass();
             $oEditorModel = &getModel('editor');
             $oModuleController = &getController('module');
 
@@ -1529,6 +1560,7 @@
          * @brief upgletyle delete tag
          **/
         function procUpgletyleTagDelete(){
+            $args = new stdClass();
             $selected_tag = trim(Context::get('selected_tag'));
             if(!$selected_tag) return new BaseObject(-1,'msg_invalid_request');
 
@@ -1556,6 +1588,7 @@
          * not good;;
          **/
         function procUpgletyleTagUpdate(){
+            $args = new stdClass();
             $selected_tag = trim(Context::get('selected_tag'));
             $new_tag = trim(Context::get('tag'));
 
@@ -1603,6 +1636,7 @@
          * @brief sync documents table tags
          **/
         function syncDocumentTags($document_srls){
+            $args = new stdClass();
             $args->document_srl = join(',',$document_srls);
             $output = executeQueryArray('tag.getAllTagList', $args);
 
@@ -1858,6 +1892,7 @@
 
 
 		function procUpgletyleWidgetConfigSave(){
+			$args = new stdClass();
 
 			$list_order_group = explode("|@|",Context::get('list_order'));
 			if(count($list_order_group) != 3) return new BaseObject(-1, 'msg_invalid_request');
@@ -1943,6 +1978,7 @@
          * @brief upgletyle update browser title
          **/
         function updateUpgletyleBrowserTitle($module_srl, $browser_title) {
+            $args = new stdClass();
             $args->module_srl = $module_srl;
             $args->browser_title = $browser_title;
             return executeQuery('upgletyle.updateUpgletyleBrowserTitle', $args);
@@ -2031,6 +2067,7 @@
 		}
 
 		private function _redirectToPermalink(&$obj) {
+			$args = new stdClass();
 
 			if($obj->act) return;
 			if(!Context::isAllowRewrite()) return;
@@ -2133,6 +2170,7 @@
          * @brief action forward apply layout
          **/
         function triggerDeleteModule(&$obj) {
+            $args = new stdClass();
 
             $oUpgletyleModel = &getModel('upgletyle');
 
@@ -2200,6 +2238,8 @@
          * @brief insert referer
          **/
         function insertReferer($oDocument) {
+            $args = new stdClass();
+            $uArgs = new stdClass();
             if($_SESSION['upgletyleReferer'][$oDocument->document_srl]) return;
             $_SESSION['upgletyleReferer'][$oDocument->document_srl] = true;
             $referer = $_SERVER['HTTP_REFERER'];
@@ -2287,6 +2327,7 @@
         }
 
         function procUpgletyleToggleEnableAPI() {
+            $vars = new stdClass();
             $vars->api_srl = Context::get('api_srl');
             $vars->module_srl = $this->module_srl;
             $output = executeQuery('upgletyle.getApiInfo',$vars);
@@ -2310,6 +2351,7 @@
         }
 
         function deleteBlogApis($module_srl){
+            $args = new stdClass();
             $args->module_srl = $module_srl;
 
             $output = executeQuery('upgletyle.deleteUpgletyleApis',$args);
@@ -2317,6 +2359,7 @@
         }
 
         function deleteBlogApi($module_srl,$api_srl){
+            $args = new stdClass();
             $args->module_srl = $module_srl;
             $args->api_srl = $api_srl;
 
@@ -2334,6 +2377,7 @@
         }
 
 		function procUpgletyleRequestExport(){
+            $args = new stdClass();
             if(!$this->domain_srl) return new BaseObject(-1,'msg_invalid_request');
 
 			$oUpgletyleAdminController = &getAdminController('upgletyle');
@@ -2352,6 +2396,7 @@
 		}
 
 		function procUpgletyleToolExtraMenuInsert(){
+            $menu = new stdClass();
             $args = Context::getRequestVars();
             $menu_name = trim(Context::get('menu_name'));
 			$menu_mid = Context::get('menu_mid');
@@ -2429,6 +2474,7 @@
 		}
 
 		function procUpgletyleToolExtraMenuDelete(){
+            $args = new stdClass();
             $menu_mid = Context::get('menu_mid');
 			if(!$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 
@@ -2443,6 +2489,7 @@
 		}
 
 		function procUpgletyleToolExtraMenuSort(){
+			$args = new stdClass();
 			$menu_mids = Context::get('menu_mids');
 			if(!$menu_mids) return new BaseObject(-1,'msg_invalid_request');
 
@@ -2490,6 +2537,7 @@
 		}
 
 		function updateModuleSrlMinus($document_srl,$module_srl){
+			$args = new stdClass();
 			
 			$args->document_srl = $document_srl;
 			$args->module_srl = abs($module_srl) * -1;

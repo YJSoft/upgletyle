@@ -27,6 +27,7 @@
         }
 
         function _loadFromDB() {
+            $args = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
 
 			if(!$this->upgletyle_srl) return;
@@ -351,6 +352,7 @@
         }
 
         function getApis() {
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $output = executeQueryArray('upgletyle.getApis', $args);
             return $output->data;

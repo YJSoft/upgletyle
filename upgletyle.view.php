@@ -38,6 +38,7 @@
          * @brief Upgletyle common init
          **/
         function initCommon($is_other_module = false){
+            $upgletyle_config = new stdClass();
 
             if(!$this->checkXECoreVersion('1.4.3')) return $this->stop(sprintf(Context::getLang('msg_requried_version'),'1.4.3'));
 
@@ -93,6 +94,7 @@
          * @brief Upgletyle init tool
          **/
         function initTool(&$oModule, $is_other_module = false){
+            $args = new stdClass();
             if (!$oModule) $oModule = $this;
 
             $this->initCommon($is_other_module);
@@ -143,6 +145,8 @@
          * @brief upgletyle init service
          **/
         function initService(&$oModule, $is_other_module = false, $isMobile = false){
+            $upgletyle = new stdClass();
+            $args = new stdClass();
             if (!$oModule) $oModule = $this;
 
             $oUpgletyleModel = &getModel('upgletyle');
@@ -220,6 +224,10 @@
          * @brief Tool dashboard
          **/
         function dispUpgletyleToolDashboard(){
+			$status = new stdClass();
+			$doc_args = new stdClass();
+			$com_args = new stdClass();
+			$args = new stdClass();
 
 			global $lang;
 
@@ -312,6 +320,8 @@
          * @brie display textule tool post manage write
          **/
         function dispUpgletyleToolPostManageWrite(){
+            $args = new stdClass();
+            $option = new stdClass();
             // set filter
             Context::addJsFilter($this->module_path.'tpl/filter', 'save_post.xml');
 
@@ -462,6 +472,7 @@
          * @brief display upgletyle tool post manage list
          **/
         function dispUpgletyleToolPostManageList(){
+            $args = new stdClass();
 
             $args->page = Context::get('page');
             if(!$args->page) $args->page = 1;
@@ -522,6 +533,7 @@
          * @brief display upgletyle tool post manage deposit
          **/
         function dispUpgletyleToolPostManageDeposit(){
+            $args = new stdClass();
             $oMaterialModel = &getModel('material');
 
             $page = Context::get('page');
@@ -560,6 +572,7 @@
          * @brief display upgletyle tool post manage tag
          **/
         function dispUpgletyleToolPostManageTag(){
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->list_count = 100000;
             $args->sort_index = Context::get('sort_index');
@@ -587,6 +600,7 @@
          * @brief display upgletyle tool communication comment
          **/
         function dispUpgletyleToolCommunicationComment(){
+            $args = new stdClass();
             Context::addJsFilter($this->module_path.'tpl/filter', 'insert_denylist.xml');
 
             $args->page = Context::get('page'); 
@@ -642,6 +656,7 @@
          * @brief display upgletyle tool communication guestbook
          **/
         function dispUpgletyleToolCommunicationGuestbook(){
+            $args = new stdClass();
             $page = Context::get('page');
             if(!$page) $page = 1;
             Context::set('page',$page);
@@ -662,6 +677,7 @@
          * @brief tool Guestbook Reply
          **/
         function dispUpgletyleToolCommunicationGuestbookReply(){
+            $option = new stdClass();
             $upgletyle_guestbook_srl = Context::get('upgletyle_guestbook_srl');
             $page = Context::get('page');
             if(!$page) $page = 1;
@@ -693,6 +709,7 @@
          * @brief display upgletyle tool communication trackback
          **/
         function dispUpgletyleToolCommunicationTrackback(){
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->search_target = Context::get('search_target');
             $args->search_keyword = Context::get('search_keyword');
@@ -730,6 +747,9 @@
          * @brief display upgletyle tool statistics visitor
          **/
         function dispUpgletyleToolStatisticsVisitor() {
+            $xml = new stdClass();
+            $total = new stdClass();
+            $output = new stdClass();
             global $lang;
 
             $selected_date = Context::get('selected_date');
@@ -894,6 +914,8 @@
          * @brief display upgletyle tool statistics visit route
          **/
         function dispUpgletyleToolStatisticsVisitRoute() {
+            $args = new stdClass();
+            $h_args = new stdClass();
             global $lang;
             $oDocumentModel = &getModel('document');
 
@@ -1002,6 +1024,7 @@
          * @brief display upgletyle tool statistics popular
          **/
         function dispUpgletyleToolStatisticsPopular(){
+            $args = new stdClass();
             $selected_date = Context::get('selected_date');
             if(!$selected_date){
                 $selected_date = date('Ymd');
@@ -1057,6 +1080,7 @@
 		}
 
 		function dispUpgletyleToolPluginWidgetConfig() {
+            $widget_list = new stdClass();
 
             $oUpgletyleModel = &getModel('upgletyle');
 
@@ -1104,6 +1128,7 @@
 
 
         function dispUpgletyleToolLayoutConfigSkin() {
+            $obj = new stdClass();
             $oModuleModel = &getModel('module');
 
             $skins = $oModuleModel->getSkins($this->module_path);
@@ -1136,6 +1161,7 @@
         }
 
         function dispUpgletyleToolLayoutConfigMobileSkin() {
+            $obj = new stdClass();
             $oModuleModel = &getModel('module');
 
             $skins = $oModuleModel->getSkins($this->module_path, 'm.skins');
@@ -1205,6 +1231,7 @@
         }
 
         function dispUpgletyleToolConfigProfile(){
+            $option = new stdClass();
             $oMemberModel = &getModel('member');
             $member_config = $oMemberModel->getMemberConfig();
             Context::set('profile_image_width', $member_config->profile_image_max_width);
@@ -1231,6 +1258,7 @@
         }
 
         function dispUpgletyleToolConfigPostwrite(){
+            $option = new stdClass();
             Context::addJsFilter($this->module_path.'tpl/filter', 'insert_config_postwrite.xml');
 
             $oEditorModel = &getModel('editor');
@@ -1279,6 +1307,7 @@
         }
 
         function dispUpgletyleToolConfigBlogApi() {
+            $args = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
             $output = $oUpgletyleModel->getBlogApiService();
             Context::set('api_services',$output->data);
@@ -1296,6 +1325,7 @@
         }
 
         function dispUpgletyleToolPostManageBasket(){
+            $args = new stdClass();
             $oDocumentModel = &getModel('document');
             $oDocumentAdminModel = &getAdminModel('document');
 
@@ -1328,6 +1358,7 @@
         }
 
         function dispUpgletyleToolConfigData() {
+			$args = new stdClass();
 			$logged_info = Context::get('logged_info');
 			if($logged_info && $logged_info->is_admin=='Y'){
 				Context::addJsFilter($this->module_path.'tpl/filter', 'export_upgletyle.xml');
@@ -1382,6 +1413,7 @@
 
 		function dispUpgletyle()
         {
+        	$args = new stdClass();
 
         	//$this->module_info->skin
         	$oModuleModel = &getModel('module');
@@ -1531,6 +1563,9 @@
         }
         
         function dispMultiPostUpgletyle(){
+        	$query_arguments = new stdClass();
+        	$args = new stdClass();
+        	$arguments = new stdClass();
         	// $document_srl is obtained only at Comment Reply and Comment Modify.
             $document_srl = Context::get('document_srl');
             $oDocumentModel = &getModel('document');
@@ -1825,6 +1860,7 @@
 	    
         private function getDocumentItems($query, $args)
         {
+            $attribute = new stdClass();
             $documents = executeQuery($query, $args);
 
             if ($documents->data)
@@ -2062,6 +2098,8 @@
          * @brief Upgletyle guestbook
          **/
         function dispUpgletyleGuestbook(){
+            $args = new stdClass();
+            $option = new stdClass();
             $reply = Context::get('replay');
             $modify = Context::get('modify');
             $page = Context::get('page');
@@ -2118,6 +2156,7 @@
          * @brief Upgletyle tag
          **/
         function dispUpgletyleTag() {
+            $obj = new stdClass();
             $oTagModel = &getModel('tag');
             $oModuleModel =&getModel('module');
 
@@ -2238,6 +2277,7 @@
         }
 
         function dispUpgletyleToolExtraMenuList(){
+            $args = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
             $config = $oUpgletyleModel->getModulePartConfig($this->module_srl);
             Context::set('config',$config);
@@ -2250,6 +2290,7 @@
         }
         
         function dispUpgletyleToolExtraMenuModuleInsert(){
+            $args = new stdClass();
             $menu_mid = Context::get('menu_mid');
 			if($menu_mid){
 				$oModuleModel = &getModel('module');
@@ -2288,6 +2329,8 @@
         }
         
         function dispUpgletyleToolExtraMenuInsert(){
+            $args = new stdClass();
+            $option = new stdClass();
             // set filter
             $menu_mid = Context::get('menu_mid');
             if($menu_mid){

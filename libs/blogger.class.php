@@ -131,52 +131,19 @@
 
 
         function _request($url, $body = null, $content_type = 'text/html', $method='GET', $headers = array(), $cookies = array()) {
-            set_include_path(_XE_PATH_."libs/PEAR");
-            require_once('PEAR.php');
-            require_once('HTTP/Request.php');
-
             $url_info = parse_url($url);
             $host = $url_info['host'];
 
-            if(__PROXY_SERVER__!==null) {
-                $oRequest = new HTTP_Request(__PROXY_SERVER__);
-                $oRequest->setMethod('POST');
-                $oRequest->addPostData('arg', serialize(array('Destination'=>$url, 'method'=>$method, 'body'=>$body, 'content_type'=>$content_type, "headers"=>$headers)));
-            } else {
-                $oRequest = new HTTP_Request($url);
-                if(count($headers)) {
-                    foreach($headers as $key => $val) {
-                        $oRequest->addHeader($key, $val);
-                    }
-                }
-                if($cookies[$host]) {
-                    foreach($cookies[$host] as $key => $val) {
-                        $oRequest->addCookie($key, $val);
-                    }
-                }
-                if(!$content_type) $oRequest->addHeader('Content-Type', 'text/html');
-                else $oRequest->addHeader('Content-Type', $content_type);
-                $oRequest->setMethod($method);
-                if($body) $oRequest->setBody($body);
+            if(!$content_type) $content_type = 'text/html';
+
+            $cookie_settings = array();
+            if($cookies[$host]) {
+                $cookie_settings[$host] = $cookies[$host];
             }
 
-            $oResponse = $oRequest->sendRequest();
+            $settings = array('follow_redirects' => true);
 
-            $code = $oRequest->getResponseCode();
-            $header = $oRequest->getResponseHeader();
-            $response = $oRequest->getResponseBody();
-            if($c = $oRequest->getResponseCookies()) {
-                foreach($c as $k => $v) {
-                    $cookies[$host][$v['name']] = $v['value'];
-                }
-            }
-            if($code > 300 && $code < 399 && $header['location']) {
-                return $this->_request($header['location'], $body, $content_type, $method, $headers, $cookies);
-            }
-
-            if($code != 200) return;
-
-            return $response;
+            return FileHandler::getRemoteResource($url, $body, 10, $method, $content_type, $headers, $cookie_settings, array(), $settings);
         }
 
     }

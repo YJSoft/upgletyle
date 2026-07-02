@@ -33,6 +33,7 @@ class ExportUpgletyle{
 	}
 
 	function setUpgletyle($module_srl){
+		$setting = new stdClass();
 		$oUpgletyleModel = &getModel('upgletyle');
 		$this->oUpgletyle = $oUpgletyleModel->getUpgletyle($module_srl);
 		$this->module_srl = $module_srl;
@@ -72,6 +73,7 @@ class ExportUpgletyle{
 	}
 
 	function getPostList(){
+		$args = new stdClass();
 		$oDocumentList = array();
 
 		$args->module_srl = join(',',array($this->module_srl,$this->module_srl*-1));
@@ -89,6 +91,7 @@ class ExportUpgletyle{
 	}
 
 	function getCommentList($document_srl){
+		$args = new stdClass();
 		$oCommentModel = &getModel('comment');
 		$oCommentList = array();
 
@@ -122,6 +125,7 @@ class ExportUpgletyle{
 	}
 
 	function getGuestbookList(){
+		$args = new stdClass();
 		$args->module_srl = $this->module_srl;
 		$output = executeQueryArray('upgletyle.getExportGuestbookList',$args);
 		$guestbook_list = array();

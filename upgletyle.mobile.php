@@ -45,6 +45,7 @@
 		}
 
 		function dispUpgletyle(){
+            $args = new stdClass();
             $oUpgletyleModel = &getModel('upgletyle');
             $oUpgletyleController = &getController('upgletyle');
             $oDocumentModel = &getModel('document');
@@ -165,6 +166,7 @@
 		}
 
         function dispUpgletyleGuestbook() {
+            $args = new stdClass();
             $page = Context::get('page');
             $page = $page ? $page : 1;
             Context::set('page',$page);
@@ -223,6 +225,7 @@
 		}
 
 		function dispUpgletyleMenu(){
+			$args = new stdClass();
 			$menu = array();
             $menu['Home'] = getFullSiteUrl($this->upgletyle->domain);
 			$menu['Profile'] = getSiteUrl($this->upgletyle->domain,'','mid',$this->module_info->mid,'act','dispUpgletyleProfile');

@@ -19,6 +19,7 @@
         }
 
         function dispUpgletyleAdminList() {
+            $args = new stdClass();
             $vars = Context::getRequestVars();
             $oUpgletyleModel = &getModel('upgletyle');
 
@@ -43,6 +44,7 @@
         }
 
         function dispUpgletyleAdminTextyleList() {
+			$args = new stdClass();
 			global $lang;
 
             $oUpgletyleModel = &getModel('upgletyle');
@@ -192,6 +194,7 @@
         }
 
         function dispUpgletyleAdminExportList(){
+			$args = new stdClass();
 			$args->page = Context::get('page');
 			$output = executeQueryArray('upgletyle.getExportList',$args);			
 			Context::set('export_list',$output->data);

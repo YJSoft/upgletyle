@@ -57,6 +57,7 @@
          * @brief get member upgletyle
          **/
         function getMemberUpgletyle($member_srl = 0) {
+            $args = new stdClass();
             if(!$member_srl && !Context::get('is_logged')) return new UpgletyleInfo();
 
             if(!$member_srl) {
@@ -122,6 +123,7 @@
          * @brief return upgletyle count
          **/
         function getUpgletyleCount($member_srl = null) {
+            $args = new stdClass();
             if(!$member_srl) {
                 $logged_info = Context::get('logged_info');
                 $member_srl = $logged_info->member_srl;
@@ -135,6 +137,7 @@
         }
 
         function getUpgletyleGuestbookList($vars){
+            $args = new stdClass();
             $oMemberModel = &getModel('member');
             $oUpgletyleController = &getController('upgletyle');
             $logged_info = Context::get('logged_info');
@@ -171,6 +174,7 @@
         }
 
         function getUpgletyleGuestbook($upgletyle_guestbook_srl){
+            $args = new stdClass();
             $oMemberModel = &getModel('member');
 
             $args->upgletyle_guestbook_srl = $upgletyle_guestbook_srl;
@@ -188,6 +192,7 @@
 
 		function getUpgletyleGuestbookAllCount($module_srl)
 		{
+			$args = new stdClass();
 			$args->module_srl = $module_srl;
 			$output = executeQuery('upgletyle.getUpgletyleGuestbookCount', $args);
 			$total_count = $output->data->count;
@@ -201,6 +206,7 @@
         }
 
         function getUpgletyleDenyList($module_srl){
+            $args = new stdClass();
             $args->module_srl = $module_srl;
             $cache_file = $this->getDenyCacheFile($module_srl);
 
@@ -286,6 +292,7 @@
         }
 
         function getSubscriptionMinPublishDate($module_srl){
+            $args = new stdClass();
             $args->module_srl = $module_srl;
             $output = executeQuery('upgletyle.getUpgletyleSubscriptionMinPublishDate', $args);
 
@@ -293,6 +300,7 @@
         }
 
         function getSubscriptionByDocumentSrl($document_srl){
+            $args = new stdClass();
             $args->document_srl = $document_srl;
             $output = executeQueryArray('upgletyle.getUpgletyleSubscriptionByDocumentSrl',$args);
 
@@ -334,6 +342,7 @@
         }
 
         function getUpgletyleSupporterList($module_srl,$YYYYMM="",$sort_index="total_count"){
+            $args = new stdClass();
             $oMemberModel = &getModel('member');
             $oModuleModel = &getModel('module');
 

@@ -20,6 +20,7 @@
             static $custom_menu = null;
 
             if(is_null($custom_menu)) {
+                $custom_menu = new stdClass();
                 $oModuleModel = &getModel('module');
                 $config = $oModuleModel->getModuleConfig('upgletyle');
                 $custom_menu->hidden_menu = $config->hidden_menu;

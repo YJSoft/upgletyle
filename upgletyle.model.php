@@ -148,7 +148,10 @@
             $args->list_count = $vars->list_count;
             if($vars->search_keyword) $args->content_search = $vars->search_keyword;
             $output = executeQueryArray('upgletyle.getUpgletyleGuestbookList',$args);
-            if(!$output->toBool() || !$output->data) return array();
+            if(!$output->toBool() || !$output->data) {
+                $output->data = array();
+                return $output;
+            }
 
             foreach($output->data as $key => $val) {
 

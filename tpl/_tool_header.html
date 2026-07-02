@@ -45,12 +45,12 @@
         <ul class="nav navbar-nav accordion">
             {@$i=0}
             <block loop="$lang->upgletyle_first_menus => $key, $val" cond="!in_array($val, $custom_menu->hidden_menu)">
-            {@ 
+            {@
                 unset($_sel);
-                $_sub = $lang->upgletyle_second_menus[$key];
-                $_attached = $custom_menu->attached_menu[$key];
+                $_sub = $lang->upgletyle_second_menus[$key] ?: array();
+                $_attached = $custom_menu->attached_menu[$key] ?: array();
                 if($act==$val[0]||in_array($act,array_keys($_sub))) $_sel = "active";
-                if($_sel == 'active') $eq = $i;                
+                if($_sel == 'active') $eq = $i;
             }
             <li class="{$_sel}"|cond="count($_sub)" class="nochild {$_sel}"|cond="!count($_sub)">
                 <a href="{getSiteUrl($upgletyle->domain,'','mid',$mid,'act',$val[0])}"|cond="$val[0]" class="first_menu" cond="$val[0]"><span class="{$_menu_icon[$i++]}"></span> {$val[1]}</a>

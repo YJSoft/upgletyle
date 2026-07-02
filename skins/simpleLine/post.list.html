@@ -6,7 +6,7 @@
                             {$document->getContent(false)}
                             {$post_suffix}
                         </div>
-                        {@$tag_list = $document->get('tag_list');}
+                        {@$tag_list = $document->get('tag_list') ?: array();}
                         <!--@if(count($tag_list))-->
                         <dl class="usedTag">
                             <dt>Tag :</dt>

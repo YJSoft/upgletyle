@@ -34,7 +34,7 @@
 		});
 	});
 </script>
-{@$tag_list = $document->get('tag_list');}
+{@$tag_list = $document->get('tag_list') ?: array();}
 <dl class="usedTag" cond="count($tag_list)">
 	<dt>Tag :</dt>
 	<dd>

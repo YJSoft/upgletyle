@@ -16,11 +16,13 @@
 
             $this->module_srl = $module_srl;
             $this->document_srl = $document_srl;
-            if(!$document_srl) return;
 
+            // getDocument() always returns a (possibly non-existent) DocumentItem,
+            // never null, even for document_srl 0 -- keep $this->oDocument non-null
+            // so every other method can safely call ->isExists() on it.
             $oDocumentModel = &getModel('document');
             $this->oDocument = $oDocumentModel->getDocument($document_srl);
-            if(!$this->oDocument->isExists()) return;
+            if(!$document_srl || !$this->oDocument->isExists()) return;
 
             $args->document_srl = $this->document_srl = $document_srl;
             $output = executeQuery('upgletyle.getPublishLogs', $args);

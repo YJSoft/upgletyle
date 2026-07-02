@@ -24,10 +24,8 @@
 
             $access_type = Context::get('access_type');
             $domain = preg_replace('/^(http|https):\/\//i','', trim(Context::get('domain')));
-            $vid = trim(Context::get('site_id'));
 
 			if($access_type == 'local') $domain = 0;
-			elseif($access_type == 'vid') $domain = $vid;
 			if($access_type != 'local' && !$domain) return new Object(-1,'msg_invalid_request');
 
 
@@ -51,7 +49,6 @@
         function insertUpgletyle($domain, $user_id_list, $settings = null) {
             if(!is_array($user_id_list)) $user_id_list = array($user_id_list);
 
-            $oAddonAdminController = &getAdminController('addon');
             $oMemberModel = &getModel('member');
             $oModuleModel = &getModel('module');
             $oModuleController = &getController('module');
@@ -59,7 +56,7 @@
             $oUpgletyleModel = &getModel('upgletyle');
             $oUpgletyleController = &getController('upgletyle');
             $oDocumentController = &getController('document');
-			
+
             $memberConfig = $oMemberModel->getMemberConfig();
             foreach($memberConfig->signupForm as $item){
             	if($item->isIdentifier) $identifierName = $item->name;
@@ -73,17 +70,8 @@
             if(!$member_srl) return new Object(-1,'msg_not_user');
             $member_info = $oMemberModel->getMemberInfoByMemberSrl($member_srl);
 
-			$site_srl = 0;
-			if($domain)
-			{
-				if(strpos($domain, '.') !== false) $domain = strtolower($domain);
-				$output = $oModuleController->insertSite($domain, 0);
-				if(!$output->toBool()) return $output;
-				$site_srl = $output->get('site_srl');
-			}
-
-			//insert a upgletyle module
-            $upgletyle->site_srl = $site_srl;
+			//insert a upgletyle module (domain_srl -1 = shared/local install, no dedicated domain)
+            $upgletyle->domain_srl = -1;
             $upgletyle->mid = $this->upgletyle_mid;
             $upgletyle->module = 'upgletyle';
             $upgletyle->module_srl = getNextSequence();
@@ -93,15 +81,31 @@
             $output = $oModuleController->insertModule($upgletyle);
             if(!$output->toBool()) return $output;
 
-
 			$module_srl = $upgletyle->module_srl;
 
-			$site->site_srl = $site_srl;
-            $site->index_module_srl = $module_srl;
-			if($domain) $site->domain = $domain;
-            $output = $oModuleController->updateSite($site);
+			//if a dedicated domain was requested, create it and point it at this module
+			if($domain)
+			{
+				if(strpos($domain, '.') !== false) $domain = strtolower($domain);
 
-            $output = $oModuleController->insertSiteAdmin($site_srl, $user_id_list);
+				$domain_args = new stdClass();
+				$domain_args->domain_srl = getNextSequence();
+				$domain_args->domain = $domain;
+				$domain_args->is_default_domain = 'N';
+				$domain_args->index_module_srl = $module_srl;
+				$domain_args->index_document_srl = 0;
+				$domain_args->http_port = null;
+				$domain_args->https_port = null;
+				$domain_args->security = 'none';
+				$domain_args->description = '';
+				$domain_args->settings = json_encode(array('title' => $upgletyle->browser_title));
+				$output = executeQuery('module.insertDomain', $domain_args);
+				if(!$output->toBool()) return $output;
+
+				$upgletyle->domain_srl = $domain_args->domain_srl;
+				$output = $oModuleController->updateModule($upgletyle);
+				if(!$output->toBool()) return $output;
+			}
 
             $args->upgletyle_title = $upgletyle->browser_title;
             $args->module_srl = $module_srl;
@@ -127,38 +131,6 @@
 
             $output = $oRssAdminController->setRssModuleConfig($module_srl, 'Y', 'Y');
             if(!$output->toBool()) return $output;
-
-            $oAddonAdminController->doInsert('autolink', $site_srl);
-            $oAddonAdminController->doInsert('counter', $site_srl);
-            $oAddonAdminController->doInsert('member_communication', $site_srl);
-            $oAddonAdminController->doInsert('member_extra_info', $site_srl);
-            $oAddonAdminController->doInsert('mobile', $site_srl);
-            $oAddonAdminController->doInsert('smartphone', $site_srl);
-            $oAddonAdminController->doInsert('referer', $site_srl);
-            $oAddonAdminController->doInsert('resize_image', $site_srl);
-            $oAddonAdminController->doInsert('blogapi', $site_srl);
-            $oAddonAdminController->doActivate('autolink', $site_srl);
-            $oAddonAdminController->doActivate('counter', $site_srl);
-            $oAddonAdminController->doActivate('member_communication', $site_srl);
-            $oAddonAdminController->doActivate('member_extra_info', $site_srl);
-            $oAddonAdminController->doActivate('mobile', $site_srl);
-            $oAddonAdminController->doActivate('smartphone', $site_srl);
-            $oAddonAdminController->doActivate('referer', $site_srl);
-            $oAddonAdminController->doActivate('resize_image', $site_srl);
-            $oAddonAdminController->doActivate('blogapi', $site_srl);
-            $oAddonAdminController->makeCacheFile($site_srl);
-
-            $oEditorController = &getAdminController('editor');
-            $oEditorController->insertComponent('colorpicker_text',true, $site_srl);
-            $oEditorController->insertComponent('colorpicker_bg',true, $site_srl);
-            $oEditorController->insertComponent('emoticon',true, $site_srl);
-            $oEditorController->insertComponent('url_link',true, $site_srl);
-            $oEditorController->insertComponent('image_link',true, $site_srl);
-            $oEditorController->insertComponent('multimedia_link',true, $site_srl);
-            $oEditorController->insertComponent('quotation',true, $site_srl);
-            $oEditorController->insertComponent('table_maker',true, $site_srl);
-            $oEditorController->insertComponent('poll_maker',true, $site_srl);
-            $oEditorController->insertComponent('image_gallery',true, $site_srl);
 
             // set category
             $obj->module_srl = $module_srl;
@@ -207,54 +179,30 @@
 			$oModuleModel = getModel('module');
             $oModuleController = getController('module');
 
-			$vars = Context::gets('site_srl','user_id','domain','access_type','vid','module_srl','member_srl');
+			$vars = Context::gets('user_id','domain','access_type','module_srl');
 			if(!$vars->module_srl) return new Object(-1,'msg_invalid_request');
 
-            if($vars->access_type == 'domain') 
-				$args->domain = strtolower($vars->domain);
-			else $args->domain = $vars->vid;
-            if(!$args->domain && $vars->access_type != 'local') 
+			$domain = ($vars->access_type == 'domain') ? strtolower(trim($vars->domain)) : '';
+            if(!$domain && $vars->access_type != 'local')
 				return new Object(-1,'msg_invalid_request');
 
 			$module_info = $oModuleModel->getModuleInfoByModuleSrl($vars->module_srl);
+			if(!$module_info) return new Object(-1,'msg_invalid_request');
 
-			//Change site srl of upgletyle module
-			if($vars->access_type == 'local' && $vars->site_srl)
+			$old_domain_srl = intval($module_info->domain_srl);
+			$new_domain_srl = $old_domain_srl;
+
+			//Change domain assignment of the upgletyle module
+			if($vars->access_type == 'local' && $old_domain_srl > 0)
 			{
-				$_args->site_srl = 0;
-				$_args->module = 'upgletyle';
-				$local_module_list = $oModuleModel->getModuleSrlList($_args);		
-				unset($_args);
+				//switching from a dedicated domain back to the shared/local install
+				$new_domain_srl = -1;
 
-				if($local_module_list) 
-					return new Object(-1,'msg_already_registed_domain');
-				
-				$_args->site_srl = $vars->site_srl;
-				$module_list = $oModuleModel->getModuleSrlList($_args);
-
-				foreach($module_list as $k => $v) {
-					$oModuleController->updateModuleSite($v->module_srl, 0);
-				}
-				executeQuery('module.deleteSite', $_args);
-				executeQuery('module.deleteSiteAdmin', $_args);
-				executeQuery('member.deleteMemberGroup', $_args);
-				executeQuery('member.deleteSiteGroup', $_args);
-				executeQuery('module.deleteLangs', $_args);
-				unset($_args);
-
-				//change site_srl to 0(default)
-				$vars->site_srl = 0;
-				$_args->site_srl = $vars->site_srl;
-				$_args->index_module_srl = $vars->module_srl;
-				$output = $oModuleController->updateSite($_args);
-				if(!$output->toBool()) return $output;
-				unset($_args);
-
-				//insert menu
-				$oMenuAdminModel = getAdminModel('menu');
+				//insert menu (module is no longer the index of its own domain)
 				$oMenuAdminController = getAdminController('menu');
 
 				$menuSrl = $oMenuAdminController->getUnlinkedMenu();
+				$menuArgs = new stdClass();
 				$menuArgs->menu_srl = $menuSrl;
 				$menuArgs->menu_item_srl = getNextSequence();
 				$menuArgs->parent_srl = 0;
@@ -269,26 +217,25 @@
 				if(!$menuItemOutput->toBool()) return $menuItemOutput;
 				$oMenuAdminController->makeXmlFile($menuSrl);
 
-				//updade module's menu_srl
+				//update module's menu_srl
+				$_args = new stdClass();
 				$_args->menu_srl = $menuArgs->menu_srl;
 				$_args->mid = $module_info->mid;
 				$output = $oModuleController->updateModuleMenu($_args);
 				if(!$output->toBool()) return $output;
-				unset($_args);
 			}
-			elseif($vars->access_type != 'local' && $vars->site_srl == 0)
+			elseif($vars->access_type != 'local' && $old_domain_srl <= 0)
 			{
-				//Delete menu
-				$oMenuAdminModel = getAdminModel('menu');
+				//switching from the shared/local install to a dedicated domain
+
+				//Delete menu (module becomes the index of its own domain)
 				$oMenuAdminController = getAdminController('menu');
 
 				$_args = new stdClass();
 				$_args->url = $module_info->mid;
-				$_args->site_srl = 0;
 				$output = executeQuery('menu.getMenuItemByUrl', $_args);
 				if($output->data)
 				{
-					unset($_args);
 					$_args = new stdClass;
 					$_args->menu_srl = $output->data->menu_srl;
 					$_args->menu_item_srl = $output->data->menu_item_srl;
@@ -303,24 +250,52 @@
 					$oMenuAdminController->makeXmlFile($_args->menu_srl);
 				}
 
-				if(strpos($args->domain, '.') !== false) $args->domain = strtolower($args->domain);
-				$output = $oModuleController->insertSite($args->domain, 0);
+				$domain_args = new stdClass();
+				$domain_args->domain_srl = getNextSequence();
+				$domain_args->domain = $domain;
+				$domain_args->is_default_domain = 'N';
+				$domain_args->index_module_srl = $vars->module_srl;
+				$domain_args->index_document_srl = 0;
+				$domain_args->http_port = null;
+				$domain_args->https_port = null;
+				$domain_args->security = 'none';
+				$domain_args->description = '';
+				$domain_args->settings = json_encode(array('title' => $module_info->browser_title));
+				$output = executeQuery('module.insertDomain', $domain_args);
 				if(!$output->toBool()) return $output;
-				$vars->site_srl = $output->get('site_srl');
 
-				$output = $oModuleController->updateModuleSite($vars->module_srl, $vars->site_srl);
-				if(!$output->toBool()) return $output;
-
-				$_args->site_srl = $vars->site_srl;
-				$_args->index_module_srl = $vars->module_srl;
-				$output = $oModuleController->updateSite($_args);
-				if(!$output->toBool()) return $output;
-				unset($_args);
+				$new_domain_srl = $domain_args->domain_srl;
 			}
-         
+			elseif($vars->access_type == 'domain' && $old_domain_srl > 0 && $domain)
+			{
+				//already on a dedicated domain; the domain name itself may have changed
+				$existing = $oModuleModel->getSiteInfo($old_domain_srl);
+				if($existing && $existing->domain_srl == $old_domain_srl)
+				{
+					$domain_args = new stdClass();
+					$domain_args->domain_srl = $old_domain_srl;
+					$domain_args->domain = $domain;
+					$domain_args->index_module_srl = $vars->module_srl;
+					$domain_args->index_document_srl = $existing->index_document_srl;
+					$domain_args->http_port = $existing->http_port;
+					$domain_args->https_port = $existing->https_port;
+					$domain_args->security = $existing->security;
+					$domain_args->settings = json_encode(get_object_vars($existing->settings));
+					$output = executeQuery('module.updateDomain', $domain_args);
+					if(!$output->toBool()) return $output;
+				}
+			}
+
+			if($new_domain_srl != $old_domain_srl)
+			{
+				$module_info->domain_srl = $new_domain_srl;
+				$output = $oModuleController->updateModule($module_info);
+				if(!$output->toBool()) return $output;
+			}
+
             $oMemberModel = &getModel('member');
 			$member_config = $oMemberModel->getMemberConfig();
-			
+
             $tmp_member_list = explode(',',$vars->user_id);
             $admin_list = array();
             $admin_member_srl = array();
@@ -342,12 +317,6 @@
                 }
             }
 
-            $site_info = $oModuleModel->getSiteInfo($vars->site_srl);
-            if(!$site_info) return new Object(-1,'msg_invalid_request');
-
-            $output = $oModuleController->insertSiteAdmin($vars->site_srl, $admin_list);
-            if(!$output->toBool()) return $output;
-
             $oModuleController->deleteAdminId($vars->module_srl);
             foreach($admin_list as $k => $v){
                 $output = $oModuleController->insertAdminId($vars->module_srl, $v);
@@ -356,13 +325,7 @@
                 if(!$output->toBool()) return $output;
             }
 
-			if($vars->site_srl)	{
-				$args->site_srl = $vars->site_srl;
-				$output = $oModuleController->updateSite($args);
-				if(!$output->toBool()) return $output;
-			}
-
-            unset($args);
+            $args = new stdClass();
             $args->module_srl = $vars->module_srl;
             $args->member_srl = $admin_member_srl[0];
             $output = executeQuery('upgletyle.updateUpgletyle', $args);
@@ -374,7 +337,7 @@
         }
 
         function procUpgletyleAdminSwitch() {
-            $site_srl = Context::get('site_srl');
+            $site_srl = Context::get('domain_srl');
             $skin = Context::get('skin');
 
             if(!$site_srl) return new Object(-1,'msg_invalid_request');
@@ -691,7 +654,7 @@
 
 		function procUpgletyleAdminExport(){
 			$site_srl = Context::get('site_srl');
-			if(!$site_srl) $site_srl = $this->module_info->site_srl;
+			if(!$site_srl) $site_srl = $this->module_info->domain_srl;
 			if(!$site_srl) return new Object(-1,'msg_invalid_request');
 			$export_type = Context::get('export_type');
 			if(!$export_type) $export_type = 'ttxml';

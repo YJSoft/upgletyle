@@ -7,7 +7,7 @@
 
     class UpgletyleInfo extends Object {
 
-        var $site_srl = null;
+        var $domain_srl = null;
         var $domain = null;
         var $upgletyle_srl = null;
         var $module_srl = null;
@@ -52,9 +52,13 @@
             $this->member_srl = $attribute->member_srl;
             $this->colorset = $attribute->colorset;
             $this->domain = $attribute->domain;
-            $this->site_srl = $attribute->site_srl;
+            $this->domain_srl = $attribute->domain_srl;
             $this->timezone = $attribute->timezone;
-            $this->default_language = $attribute->default_language;
+
+            $domain_settings = $attribute->domain_settings ? json_decode($attribute->domain_settings) : null;
+            $this->default_language = ($domain_settings && !empty($domain_settings->language) && $domain_settings->language !== 'default')
+                ? $domain_settings->language
+                : config('locale.default_lang');
 
             $this->adds($attribute);
         }

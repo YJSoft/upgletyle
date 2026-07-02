@@ -48,8 +48,8 @@
             $site_module_info = Context::get('site_module_info');
             if(!$this->module_srl) {
                 $site_module_info = Context::get('site_module_info');
-                $site_srl = $site_module_info->site_srl;
-                if($site_srl) {
+                $domain_srl = intval($site_module_info->domain_srl ?? 0);
+                if($domain_srl > 0) {
                     $this->module_srl = $site_module_info->index_module_srl;
                     $this->module_info = $oModuleModel->getModuleInfoByModuleSrl($this->module_srl);
                     if (!$is_other_module){
@@ -75,7 +75,7 @@
             }
 
             $this->upgletyle = $oUpgletyleModel->getUpgletyle($this->module_info->module_srl);
-            $this->site_srl = $this->upgletyle->site_srl;
+            $this->domain_srl = $this->upgletyle->domain_srl;
             Context::set('upgletyle',$this->upgletyle);
             Context::set('textyle',$this->upgletyle);
 
@@ -191,7 +191,7 @@
             if($this->upgletyle->get('post_use_suffix')=='Y' && $this->upgletyle->get('post_suffix')) Context::set('post_suffix', $this->upgletyle->get('post_suffix'));
 
             $extra_menus = array();
-            $args->site_srl = $this->site_srl;
+            $args->site_srl = $this->domain_srl;
             $output = executeQueryArray('upgletyle.getExtraMenus',$args);
             if($output->toBool() && $output->data){
                 foreach($output->data as $i => $menu){
@@ -226,13 +226,13 @@
             $oUpgletyleModel = &getModel('upgletyle');
 
             $oCounterModel = &getModel('counter');
-            $counter = $oCounterModel->getStatus(array(0,date("Ymd")),$this->site_srl);
+            $counter = $oCounterModel->getStatus(array(0,date("Ymd")),$this->domain_srl);
             $status->total_visitor = $counter[0]->unique_visitor;
             $status->visitor = $counter[date("Ymd")]->unique_visitor;
             Context::set('status', $status);
 
 			//차트 출력 (이번주 / 저번주)
-			$detail_status = $oCounterModel->getHourlyStatus('week', date("Ymd",time()), $this->site_srl);
+			$detail_status = $oCounterModel->getHourlyStatus('week', date("Ymd",time()), $this->domain_srl);
 			$i=0;
 			foreach($detail_status->list as $key => $val) {
 				$_k = $lang->unit_week[date('l',strtotime($key))];
@@ -241,7 +241,7 @@
 				$i++;
 			}
 			$last_date = date("Ymd",strtotime(date("Ymd",time()))-60*60*24*7);
-			$last_detail_status = $oCounterModel->getHourlyStatus('week', $last_date, $this->site_srl);
+			$last_detail_status = $oCounterModel->getHourlyStatus('week', $last_date, $this->domain_srl);
 
 			$i=0;
 			foreach($last_detail_status->list as $key => $val) {
@@ -360,13 +360,7 @@
 
             // permalink
             $permalink = '';
-            if(isSiteID($this->upgletyle->domain)){
-                if(Context::isAllowRewrite()){
-                    $permalink = getFullSiteUrl($this->upgletyle->domain,'') . '/entry/';
-                }else{
-                    $permalink = getFullSiteUrl($this->upgletyle->domain).'?vid='.$this->upgletyle->domain . '&mid='.Context::get('mid').'&entry=';
-                }
-            }else{
+            {
                 if(Context::isAllowRewrite()){
                     $permalink = getFullSiteUrl($this->upgletyle->domain,'').'entry/';
                 }else{
@@ -761,7 +755,7 @@
             $selected_count = 0;
 
             // total & today
-            $counter = $oCounterModel->getStatus(array(0,date("Ymd")),$site_module_info->site_srl);
+            $counter = $oCounterModel->getStatus(array(0,date("Ymd")),$site_module_info->domain_srl);
             $total->total = $counter[0]->unique_visitor;
             $total->today = $counter[date("Ymd")]->unique_visitor;
 
@@ -773,7 +767,7 @@
                         $disp_selected_date = date("Y", strtotime($selected_date));
                         $before_url = getUrl('selected_date', date("Ymd",strtotime($selected_date)-60*60*24*365));
                         $after_url = getUrl('selected_date', date("Ymd",strtotime($selected_date)+60*60*24*365));
-                        $detail_status = $oCounterModel->getHourlyStatus('month', $selected_date, $site_module_info->site_srl);
+                        $detail_status = $oCounterModel->getHourlyStatus('month', $selected_date, $site_module_info->domain_srl);
 
 						$i=0;
                         foreach($detail_status->list as $key => $val) {
@@ -798,7 +792,7 @@
 
 
                         $last_date = date("Ymd",strtotime($selected_date)-60*60*24*365);
-                        $last_detail_status = $oCounterModel->getHourlyStatus('month', $last_date, $site_module_info->site_srl);
+                        $last_detail_status = $oCounterModel->getHourlyStatus('month', $last_date, $site_module_info->domain_srl);
 
 						$i=0;
                         foreach($last_detail_status->list as $key => $val) {
@@ -813,7 +807,7 @@
                         $before_url = getUrl('selected_date', date("Ymd",strtotime($selected_date)-60*60*24*7));
                         $after_url = getUrl('selected_date', date("Ymd",strtotime($selected_date)+60*60*24*7));
                         $disp_selected_date = date("Y.m.d", strtotime($selected_date));
-                        $detail_status = $oCounterModel->getHourlyStatus('week', $selected_date, $site_module_info->site_srl);
+                        $detail_status = $oCounterModel->getHourlyStatus('week', $selected_date, $site_module_info->domain_srl);
 
 						$i=0;
                         foreach($detail_status->list as $key => $val) {
@@ -835,7 +829,7 @@
                         }
 
                         $last_date = date("Ymd",strtotime($selected_date)-60*60*24*7);
-                        $last_detail_status = $oCounterModel->getHourlyStatus('week', $last_date, $site_module_info->site_srl);
+                        $last_detail_status = $oCounterModel->getHourlyStatus('week', $last_date, $site_module_info->domain_srl);
 						
 						$i=0;
                         foreach($last_detail_status->list as $key => $val) {
@@ -850,7 +844,7 @@
                         $after_url = getUrl('selected_date', date("Ymd",strtotime($selected_date)+60*60*24));
                         $disp_selected_date = date("Y.m.d", strtotime($selected_date));
 
-                        $detail_status = $oCounterModel->getHourlyStatus('hour', $selected_date, $site_module_info->site_srl);
+                        $detail_status = $oCounterModel->getHourlyStatus('hour', $selected_date, $site_module_info->domain_srl);
 						
                         foreach($detail_status->list as $key => $val) {
 
@@ -868,7 +862,7 @@
                         }
 
                         $last_date = date("Ymd",strtotime($selected_date)-60*60*24);
-                        $last_detail_status = $oCounterModel->getHourlyStatus('hour', $last_date, $site_module_info->site_srl);
+                        $last_detail_status = $oCounterModel->getHourlyStatus('hour', $last_date, $site_module_info->domain_srl);
 
                         foreach($last_detail_status->list as $key => $val) {
 							$chart_value_last[] = sprintf("[%d, %02d]", $key, $val);
@@ -1173,7 +1167,7 @@
 			if($this->module_info->mskin == '/USE_DEFAULT/' && $this->module_info->is_mskin_fix == 'N')
 			{
             	$site_module_info = Context::get('site_module_info');
-				$defaultSkin = $oModuleModel->getModuleDefaultSkin('upgletyle', 'M', $site_module_info->site_srl);
+				$defaultSkin = $oModuleModel->getModuleDefaultSkin('upgletyle', 'M', $site_module_info->domain_srl);
             	Context::set('cur_skin', $output[$defaultSkin]);
 			}
 			else
@@ -1268,10 +1262,10 @@
 
         function dispUpgletyleToolConfigEditorComponents(){
             $site_module_info = Context::get('site_module_info');
-            $site_srl = (int)$site_module_info->site_srl;
+            $domain_srl = (int)$site_module_info->domain_srl;
 
             $oEditorModel = &getModel('editor');
-            $component_list = $oEditorModel->getComponentList(false, $site_srl);
+            $component_list = $oEditorModel->getComponentList(false, $domain_srl);
 
             Context::set('component_list', $component_list);
         }
@@ -1329,7 +1323,7 @@
         function dispUpgletyleToolConfigAddon() {
             $oAddonModel = &getAdminModel('addon');
             $oAdminView= &getAdminView('admin');
-            $addon_list = $oAddonModel->getAddonList($this->site_srl);
+            $addon_list = $oAddonModel->getAddonList($this->domain_srl);
             Context::set('addon_list', $addon_list);
         }
 
@@ -1341,7 +1335,7 @@
 				Context::addJsFilter($this->module_path.'tpl/filter', 'request_export_upgletyle.xml');
 			}
 
-			$args->site_srl = $this->site_srl;
+			$args->site_srl = $this->domain_srl;
 			$output = executeQuery('upgletyle.getExport',$args);
 			Context::set('export',$output->data);
         }
@@ -1353,6 +1347,39 @@
         /**
          * @brief Upgletyle home
          **/
+		/**
+		 * @brief entry point for the up-xxx shortcut urls (up-setup/up-admin/up-post).
+		 * triggerModuleInitBefore (moduleHandler.init before) already rewrites mid/act
+		 * for the known shortcuts before this ever runs; this is just a safe fallback
+		 * for an unrecognized up_act value.
+		 **/
+		function dispUpgletyleShortcut()
+		{
+			header('location:' . getNotEncodedUrl('', 'mid', $this->upgletyle_mid));
+			Context::close();
+			exit;
+		}
+
+		/**
+		 * @brief entry point for date-based permalinks (/YYYY/MM/entry, /YYYY/MM/DD/entry)
+		 **/
+		function dispUpgletylePermalink()
+		{
+			$entry = Context::get('entry');
+			if($entry)
+			{
+				$oDocumentModel = &getModel('document');
+				$document_srl = $oDocumentModel->getDocumentSrlByAlias('upgletyle', $entry);
+				if($document_srl) Context::set('document_srl', $document_srl);
+			}
+
+			$oModuleModel = &getModel('module');
+			$module_info = $oModuleModel->getModuleInfoByDocumentSrl(Context::get('document_srl'));
+			if(!$module_info || $module_info->module != 'upgletyle') return $this->stop('msg_invalid_request');
+
+			$this->dispUpgletyle();
+		}
+
 		function dispUpgletyle()
         {
 
@@ -2108,7 +2135,7 @@
                     }
                 }
             }
-            $site_admin_list = $oModuleModel->getSiteAdmin($this->module_info->site_srl);
+            $site_admin_list = $oModuleModel->getAdminId($this->module_info->module_srl);
             foreach($site_admin_list as $admin){
             	$obj->module_srl = $admin->member_srl;
             	$output = $oTagModel->getTagList($obj);
@@ -2215,7 +2242,7 @@
             $config = $oUpgletyleModel->getModulePartConfig($this->module_srl);
             Context::set('config',$config);
 
-            $args->site_srl = $this->site_srl;
+            $args->site_srl = $this->domain_srl;
             $output = executeQueryArray('upgletyle.getExtraMenus',$args);
             if(!$output->toBool()) return $output;
             Context::set('extra_menu_list',$output);
@@ -2226,7 +2253,7 @@
             $menu_mid = Context::get('menu_mid');
 			if($menu_mid){
 				$oModuleModel = &getModel('module');
-				$module_info = $oModuleModel->getModuleInfoByMid($menu_mid,$this->site_srl);
+				$module_info = $oModuleModel->getModuleInfoByMid($menu_mid);
 				if(!$module_info) return new Object(-1,'msg_invalid_request');
 
 				$args->module_srl = $module_info->module_srl;
@@ -2246,7 +2273,7 @@
 			Context::set('config',$config);
 
 			$used_extra_menu_count = array();
-			$args->site_srl = $this->site_srl;
+			$args->site_srl = $this->domain_srl;
 			$output = executeQueryArray('upgletyle.getExtraMenus',$args);
 
 			if($output->data){
@@ -2265,7 +2292,7 @@
             $menu_mid = Context::get('menu_mid');
             if($menu_mid){
                 $oModuleModel = &getModel('module');
-                $module_info = $oModuleModel->getModuleInfoByMid($menu_mid,$this->site_srl);
+                $module_info = $oModuleModel->getModuleInfoByMid($menu_mid);
                 if(!$module_info) return new Object(-1,'msg_invalid_request');
                 
                 $oWidgetController = &getController('widget');

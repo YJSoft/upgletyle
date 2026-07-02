@@ -101,6 +101,13 @@
     </permissions>
     <actions>
         <action name="dispUpgletyle" type="view" index="true" />
+        <action name="dispUpgletyleShortcut" type="view" global_route="true" standalone="true">
+            <route route="up-$up_act:any" priority="0" />
+        </action>
+        <action name="dispUpgletylePermalink" type="view" global_route="true" standalone="true">
+            <route route="$p_year:int/$p_month:int/$p_day:int/$entry:any" priority="20" />
+            <route route="$p_year:int/$p_month:int/$entry:any" priority="10" />
+        </action>
         <action name="dispUpgletyleToolLogin" type="view" />
         <action name="rss" standalone="true" type="view" />
         <action name="dispUpgletyleProfile" type="view" />

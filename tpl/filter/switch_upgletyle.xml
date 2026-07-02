@@ -1,6 +1,6 @@
 <filter name="switch_upgletyle" module="upgletyle" act="procUpgletyleAdminSwitch">
     <form>
-        <node target="site_srl" required="true" />
+        <node target="domain_srl" required="true" />
     </form>
     <response callback_func="completeSwitchUpgletyle">
         <tag name="error" />

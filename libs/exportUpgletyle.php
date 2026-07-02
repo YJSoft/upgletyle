@@ -5,7 +5,7 @@ class ExportUpgletyle{
 	var $oUpgletyle;
 	var $site_info;
 	var $module_srl;
-	var $site_srl;
+	var $domain_srl;
 	var $category_list;
 	var $language;
 	var $timezone;
@@ -36,15 +36,15 @@ class ExportUpgletyle{
 		$oUpgletyleModel = &getModel('upgletyle');
 		$this->oUpgletyle = $oUpgletyleModel->getUpgletyle($module_srl);
 		$this->module_srl = $module_srl;
-		$this->site_srl = $oUpgletyle->site_srl;
+		$this->domain_srl = $this->oUpgletyle->domain_srl;
 
 		$oModuleModel = &getModel('module');
-		$this->site_info = $oModuleModel->getSiteInfo($this->site_srl);
+		$this->site_info = $oModuleModel->getSiteInfo($this->domain_srl);
 
 		// setting
-		$setting->language = $oUpgletyle->default_language;
+		$setting->language = $this->oUpgletyle->default_language;
 		$setting->domain = Context::getDefaultUrl();
-		$setting->timezone = $oUpgletyle->timezone;
+		$setting->timezone = $this->oUpgletyle->timezone;
 		$this->setting = $setting;
 	}
 

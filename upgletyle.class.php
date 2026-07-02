@@ -50,8 +50,6 @@
             array('moduleHandler.init', 'upgletyle', 'controller', 'triggerModuleInitBefore', 'before')
         );
 
-		var $htaccess = "# upgletyle start\nRewriteRule ^(up\-[a-zA-Z0-9_]+)$ ./index.php?up_act=$1 [L,QSA]\nRewriteRule ^([a-zA-Z0-9_]+)/(up\-[a-zA-Z0-9_]+)$ ./index.php?vid=$1&up_act=$2 [L,QSA]\nRewriteRule ^([a-zA-Z0-9_]+)/([0-9]{4})/([0-9]{2})/([^/]+)$ ./index.php?vid=$1&p_year=$2&p_month=$3&entry=$4 [L,QSA]\nRewriteRule ^([a-zA-Z0-9_]+)/([0-9]{4})/([0-9]{2})/([0-9]{2})/([^/]+)$ ./index.php?vid=$1&p_year=$2&p_month=$3&p_day=$4&entry=$5 [L,QSA]\nRewriteRule ^([0-9]{4})/([0-9]{2})/([^/]+)$ ./index.php?p_year=$1&p_month=$2&entry=$3 [L,QSA]\nRewriteRule ^([0-9]{4})/([0-9]{2})/([0-9]{2})/([^/]+)$ ./index.php?p_year=$1&p_month=$2&p_month=$3&entry=$4 [L,QSA]\n# upgletyle end\n\n";
-
         /**
          * @brief module install
          **/
@@ -61,15 +59,6 @@
             foreach($this->add_triggers as $trigger) {
                 $oModuleController->insertTrigger($trigger[0], $trigger[1], $trigger[2], $trigger[3], $trigger[4]);
             }
-
-			//.htaccess modify on install process
-			$htaccess = FileHandler::readFile(_XE_PATH_.'.htaccess');
-			if(!preg_match('/# upgletyle start/', $htaccess)) 
-			{
-				$find = "#shop / vid / [category|product] / identifier";
-				$buff = str_replace($find, $this->htaccess.$find, $htaccess);
-				FileHandler::writeFile(_XE_PATH_.'.htaccess', $buff);
-			}
         }
 
         /**
@@ -87,9 +76,15 @@
 			if(!$oDB->isColumnExists("upgletyle","category_list_count")) return true;
 			if(!$oDB->isColumnExists("upgletyle","permalink")) return true;
 
-			//.htaccess check
-			$htaccess = FileHandler::readFile(_XE_PATH_.'.htaccess');
-			if(!preg_match('/# upgletyle start/', $htaccess)) return true;
+			//legacy site_srl -> domain_srl migration (virtual site -> multidomain)
+			//only run once core has finished migrating sites -> domains
+			if($oDB->isTableExists('domains') && $oModuleModel->getDefaultDomainInfo())
+			{
+				$args = new stdClass();
+				$args->module = 'upgletyle';
+				$output = executeQueryArray('upgletyle.getUpgletyleLegacySiteSrl', $args);
+				if($output->toBool() && $output->data) return true;
+			}
 
             return false;
         }
@@ -112,11 +107,28 @@
 			if(!$oDB->isColumnExists("upgletyle","category_list_count")) $oDB->addColumn('upgletyle',"category_list_count","varchar",2,30,true);
 			if(!$oDB->isColumnExists("upgletyle","permalink")) $oDB->addColumn('upgletyle',"permalink","varchar",40,'permalink_default',true);
 
-			//.htaccess update
-			$htaccess = FileHandler::readFile(_XE_PATH_.'.htaccess');
-			$find = "#shop / vid / [category|product] / identifier";
-			$buff = str_replace($find, $this->htaccess.$find, $htaccess);
-			FileHandler::writeFile(_XE_PATH_.'.htaccess', $buff);
+			//legacy site_srl -> domain_srl migration (virtual site -> multidomain).
+			//core's own module.moduleUpdate() migrates the old 'sites' table into 'domains',
+			//reusing the same numeric id (domain_srl = old site_srl). Wait for that to finish first,
+			//then point any upgletyle module row that still has a legacy nonzero site_srl at the
+			//matching domain_srl (they are guaranteed to be the same id by core's migration).
+			if($oDB->isTableExists('domains') && $oModuleModel->getDefaultDomainInfo())
+			{
+				$args = new stdClass();
+				$args->module = 'upgletyle';
+				$output = executeQueryArray('upgletyle.getUpgletyleLegacySiteSrl', $args);
+				if($output->toBool() && $output->data)
+				{
+					foreach($output->data as $row)
+					{
+						$migrate_args = new stdClass();
+						$migrate_args->module_srl = $row->module_srl;
+						$migrate_args->domain_srl = $row->site_srl;
+						executeQuery('upgletyle.updateUpgletyleModuleDomainSrl', $migrate_args);
+					}
+					Rhymix\Framework\Cache::clearGroup('site_and_module');
+				}
+			}
 
 			return new Object(0, 'success_updated');
         }

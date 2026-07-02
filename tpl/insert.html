@@ -4,7 +4,7 @@
 	<load target="filter/update_upgletyle.xml" />
 	<h1>{$lang->cmd_upgletyle_modify}</h1>
 	<form action="./" method="post" onsubmit="return procFilter(this, update_upgletyle)" id="upgletyleFo" class="x_form-horizontal">
-		<input type="hidden" name="site_srl" value="{$upgletyle->site_srl}" />
+		<input type="hidden" name="domain_srl" value="{$upgletyle->domain_srl}" />
 		<input type="hidden" name="module_srl" value="{$module_srl}" />
 	<!--@else-->
 	<load target="filter/insert_upgletyle.xml" />
@@ -14,20 +14,15 @@
 		<div class="x_control-group">
 			<label class="x_control-label">{$lang->access_type}</label>
 			<div class="x_controls">
-				<label for="chkLocal" class="x_inline"><input type="radio" id="chkLocal" name="access_type" value="local" onclick="toggleAccessType('local');" checked="checked"|cond="!isSiteID($upgletyle->domain) && !$upgletyle->site_srl" /> 기본 도메인 접속</label>
-				<label for="chkDomain" class="x_inline"><input type="radio" id="chkDomain" name="access_type" value="domain" onclick="toggleAccessType('domain');" checked="checked"|cond="!isSiteID($upgletyle->domain) && $upgletyle->site_srl" /> {$lang->access_domain}</label>
-				<label for="chkVid" class="x_inline"><input type="radio" id="chkVid" name="access_type" value="vid" onclick="toggleAccessType('vid');" checked="checked"|cond="isSiteID($upgletyle->domain)" /> {$lang->access_vid}</label>
+				<label for="chkLocal" class="x_inline"><input type="radio" id="chkLocal" name="access_type" value="local" onclick="toggleAccessType('local');" checked="checked"|cond="$upgletyle->domain_srl <= 0" /> 기본 도메인 접속</label>
+				<label for="chkDomain" class="x_inline"><input type="radio" id="chkDomain" name="access_type" value="domain" onclick="toggleAccessType('domain');" checked="checked"|cond="$upgletyle->domain_srl > 0" /> {$lang->access_domain}</label>
 
-				<div id="accessLocal" hidden|cond="!(!isSiteID($upgletyle->domain) && !$upgletyle->site_srl)" style="margin-top:10px;">
+				<div id="accessLocal" hidden|cond="!($upgletyle->domain_srl <= 0)" style="margin-top:10px;">
 					<p class="x_help-block">기본 도메인 주소인 <strong>{Context::getDefaultUrl()}</strong>를 블로그 기본 도메인으로 사용합니다<br />*주의 : 이 설정으로 블로그 제작시 XE사이트 첫페이지는 블로그 페이지가 노출됩니다.</p>
 				</div>
-				<div id="accessDomain" hidden|cond="!(!isSiteID($upgletyle->domain) && $upgletyle->site_srl)" style="margin-top:10px;">
-					http:// <input type="text" name="domain" value="{$upgletyle->domain}"|cond="!isSiteID($upgletyle->domain)" title="URL" />
+				<div id="accessDomain" hidden|cond="!($upgletyle->domain_srl > 0)" style="margin-top:10px;">
+					http:// <input type="text" name="domain" value="{$upgletyle->domain}"|cond="$upgletyle->domain_srl > 0" title="URL" />
 					<p class="x_help-block">{$lang->about_domain}</p>
-				</div>
-				<div id="accessVid" hidden|cond="!(isSiteID($upgletyle->domain))" style="margin-top:10px;">
-					<input type="text" name="vid" value="{$upgletyle->domain}"|cond="isSiteID($upgletyle->domain)" title="Site ID" />
-					<p class="x_help-block">{$lang->about_vid}</p>
 				</div>
 			</div>
 		</div>

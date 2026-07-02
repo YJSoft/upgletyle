@@ -1,0 +1,14 @@
+<query id="getUpgletyleLegacySiteSrl" action="select">
+    <tables>
+        <table name="modules" alias="modules" />
+    </tables>
+    <columns>
+        <column name="modules.module_srl" alias="module_srl" />
+        <column name="modules.site_srl" alias="site_srl" />
+    </columns>
+    <conditions>
+        <condition operation="equal" column="modules.module" var="module" notnull="notnull" />
+        <condition operation="notequal" column="modules.site_srl" default="0" pipe="and" />
+        <condition operation="equal" column="modules.domain_srl" default="-1" pipe="and" />
+    </conditions>
+</query>

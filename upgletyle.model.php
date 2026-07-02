@@ -338,7 +338,7 @@
             $oModuleModel = &getModel('module');
 
             $module_info = $oModuleModel->getModuleInfoByModuleSrl($module_srl);
-            $site_admin_list = $oModuleModel->getSiteAdmin($module_info->site_srl);
+            $site_admin_list = $oModuleModel->getAdminId($module_srl);
             $site_admin_srls = array();
 			if($site_admin_list){
 				foreach($site_admin_list as $k => $v){
@@ -468,9 +468,9 @@
 
 			Context::loadJavascriptPlugin('ui.tree');
 
-			// Get a list of member groups
+			// Get a list of member groups (site-scoped member groups no longer exist; use the global list)
 			$oMemberModel = &getModel('member');
-			$group_list = $oMemberModel->getGroups($module_info->site_srl);
+			$group_list = $oMemberModel->getGroups(0);
 			Context::set('group_list', $group_list);
 
 			$security = new Security();
@@ -539,18 +539,9 @@
 		function getPermalinkUrl($type='default',$args)
 		{
 
-			// retrieve virtual site information				
+			// retrieve current domain information
 			$site_module_info = Context::get('site_module_info');
-
-			// If $domain, $vid are not set, use current site information
-			if($site_module_info->domain && isSiteID($site_module_info->domain))
-			{
-				$vid = $site_module_info->domain;
-			}
-			else
-			{
-				$domain = $site_module_info->domain;
-			}
+			$domain = $site_module_info->domain;
 
 			// if $domain is set, compare current URL. If they are same, remove the domain, otherwise link to the domain.
 			if($domain)

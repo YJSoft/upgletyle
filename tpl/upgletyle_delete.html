@@ -4,7 +4,7 @@
 
 <form action="./" method="get" onsubmit="return procFilter(this, delete_upgletyle)" class="section">
 	<input type="hidden" name="page" value="{$page}" />
-	<input type="hidden" name="site_srl" value="{$upgletyle_info->site_srl}" />
+	<input type="hidden" name="domain_srl" value="{$upgletyle_info->domain_srl}" />
 	<input type="hidden" name="module_srl" value="{$upgletyle_info->module_srl}" />
 
 	<h1>{$lang->confirm_delete}</h1>
@@ -12,8 +12,7 @@
 		<thead>
 			<th scope="col">{$lang->module_name}</th>
 			<th scope="col">{$lang->upgletyle_title}</th>
-			<th scope="col" cond="isSiteId($upgletyle_info->domain)">Site ID</th>
-			<th scope="col" cond="!isSiteId($upgletyle_info->domain)">{$lang->domain}</th>
+			<th scope="col" cond="$upgletyle_info->domain_srl > 0">{$lang->domain}</th>
 		</thead>
 		<tbody>
 			<tr>

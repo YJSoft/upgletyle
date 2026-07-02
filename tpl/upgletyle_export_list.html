@@ -21,8 +21,8 @@
 				<td>{zdate($val->export_date,'Y.m.d H:i')}</td>
 				<td>{$val->export_file}</td>
 				<td>
-					<button type="button" onclick="exportUpgletyle({$val->site_srl},'ttxml')" class="x_icon-download-alt">{$lang->cmd_upgletyle_export_file}</button>
-					<button type="button" onclick="deleteExportUpgletyle({$val->site_srl})" class="x_icon-trash">{$lang->cmd_delete}</button>
+					<button type="button" onclick="exportUpgletyle({$val->domain_srl},'ttxml')" class="x_icon-download-alt">{$lang->cmd_upgletyle_export_file}</button>
+					<button type="button" onclick="deleteExportUpgletyle({$val->domain_srl})" class="x_icon-trash">{$lang->cmd_delete}</button>
 				</td>
 			</tr>
 		</tbody>

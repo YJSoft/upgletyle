@@ -3,10 +3,14 @@
         <table name="modules" alias="modules" />
         <table name="textyle_export" alias="export" />
         <table name="member" alias="member" />
-        <table name="sites" alias="sites" />
+        <table name="domains" alias="domains" type="left join">
+			<conditions>
+				<condition operation="equal" column="domains.domain_srl" default="modules.domain_srl" filter="number" />
+			</conditions>
+		</table>
     </tables>
     <columns>
-        <column name="sites.domain" alias="domain" />
+        <column name="domains.domain" alias="domain" />
         <column name="member.nick_name" alias="nick_name" />
         <column name="member.user_name" alias="user_name" />
         <column name="member.user_id" alias="user_id" />
@@ -19,7 +23,6 @@
     </columns>
     <conditions>
 		<condition operation="equal" column="export.site_srl" var="site_srl" filter="number" pipe="and" />
-        <condition operation="equal" column="sites.site_srl" default="modules.site_srl" pipe="and" />
         <condition operation="equal" column="export.member_srl" default="member.member_srl" filter="number" pipe="and" />
         <condition operation="equal" column="modules.module_srl" default="export.module_srl" filter="number" pipe="and" />
     </conditions>

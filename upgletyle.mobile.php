@@ -53,7 +53,7 @@
             $args->search_target = Context::get('search_target');
             $args->search_keyword = Context::get('search_keyword');
 			$args->module_srl = $this->module_srl;
-			$args->site_srl = $this->site_srl;
+			$args->site_srl = $this->domain_srl;
 
             $args->page = Context::get('page');
             $args->page = $args->page>0 ? $args->page : 1;
@@ -229,7 +229,7 @@
             $menu['Guestbook'] = getSiteUrl($this->upgletyle->domain,'','mid',$this->module_info->mid,'act','dispUpgletyleGuestbook');
             //$menu['Tags'] = getSiteUrl($this->upgletyle->domain,'','mid',$this->module_info->mid,'act','dispUpgletyleTag');
 
-			$args->site_srl = $this->site_srl;
+			$args->site_srl = $this->domain_srl;
 			$output = executeQueryArray('upgletyle.getExtraMenus',$args);
 			if($output->toBool() && $output->data){
 				foreach($output->data as $v){

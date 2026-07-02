@@ -14,8 +14,8 @@
             $oModuleModel = &getModel('module');
 
             $site_module_info = Context::get('site_module_info');
-            $site_srl = $site_module_info->site_srl;
-            if($site_srl) {
+            $domain_srl = intval($site_module_info->domain_srl ?? 0);
+            if($domain_srl > 0) {
                 $this->module_srl = $site_module_info->index_module_srl;
                 $this->module_info = $oModuleModel->getModuleInfoByModuleSrl($this->module_srl);
                 Context::set('module_info',$this->module_info);
@@ -25,7 +25,7 @@
 
             $this->custom_menu = $oUpgletyleModel->getUpgletyleCustomMenu();
             $this->upgletyle = $oUpgletyleModel->getUpgletyle($this->module_srl);
-            $this->site_srl = $this->upgletyle->site_srl;
+            $this->domain_srl = $this->upgletyle->domain_srl;
             Context::set('upgletyle',$this->upgletyle);
 
             // deny
@@ -113,7 +113,7 @@
 
 			$this->setMessage('success_updated');
 
-			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispUpgletyleToolConfigCommunication','vid',Context::get('vid'));
+			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispUpgletyleToolConfigCommunication');
 			$this->setRedirectUrl($returnUrl);
         }
 
@@ -223,7 +223,7 @@
 
 
 			$this->setMessage('success_updated');
-			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', 'upgletyle', 'act', 'dispUpgletyleToolConfigProfile','vid',Context::get('vid'));
+			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', 'upgletyle', 'act', 'dispUpgletyleToolConfigProfile');
 			$this->setRedirectUrl($returnUrl);
         }
 
@@ -260,12 +260,28 @@
             $output = $oModuleController->updateModule($module_info);
             if(!$output->toBool()) return $output;
 
-			unset($args);
-            $args->index_module_srl = $this->module_srl;
-            $args->default_language = Context::get('language');
-            $args->site_srl = $this->site_srl;
-            $output = $oModuleController->updateSite($args);
-            if(!$output->toBool()) return $output;
+			// if this instance has its own dedicated domain, keep that domain's language in sync;
+			// shared/local instances don't own a domain, so there is nothing to update here.
+			if($this->domain_srl > 0)
+			{
+				$existing = $oModuleModel->getSiteInfo($this->domain_srl);
+				if($existing && $existing->domain_srl == $this->domain_srl)
+				{
+					$domain_args = new stdClass();
+					$domain_args->domain_srl = $this->domain_srl;
+					$domain_args->domain = $existing->domain;
+					$domain_args->index_module_srl = $this->module_srl;
+					$domain_args->index_document_srl = $existing->index_document_srl;
+					$domain_args->http_port = $existing->http_port;
+					$domain_args->https_port = $existing->https_port;
+					$domain_args->security = $existing->security;
+					$settings = get_object_vars($existing->settings);
+					$settings['language'] = Context::get('language');
+					$domain_args->settings = json_encode($settings);
+					$output = executeQuery('module.updateDomain', $domain_args);
+					if(!$output->toBool()) return $output;
+				}
+			}
 
             if(Context::get('delete_icon')=='Y') $this->deleteUpgletyleFavicon($this->module_srl);
 
@@ -273,7 +289,7 @@
             if(Context::isUploaded()&&is_uploaded_file($favicon['tmp_name'])) $this->insertUpgletyleFavicon($this->module_srl,$favicon['tmp_name']);
 
 			$this->setMessage('success_updated');
-			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', 'upgletyle', 'act', 'dispUpgletyleToolConfigInfo','vid',Context::get('vid'));
+			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', 'upgletyle', 'act', 'dispUpgletyleToolConfigInfo');
 			$this->setRedirectUrl($returnUrl);
         }
 
@@ -1463,7 +1479,7 @@
             $oModuleController->insertModulePartConfig('editor',$this->module_srl,$editor_config);
 			
             $this->setMessage('success_updated');
-			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispUpgletyleToolConfigPostwrite','vid',Context::get('vid'));
+			$returnUrl = Context::get('success_return_url') ? Context::get('success_return_url') : getNotEncodedUrl('', 'mid', Context::get('mid'), 'act', 'dispUpgletyleToolConfigPostwrite');
 			$this->setRedirectUrl($returnUrl);
 
         }
@@ -1675,7 +1691,6 @@
 				$module_info->mskin = $mskin;
 
 				$module_info->module_srl = $module_srl;
-				$module_info->site_srl = $this->site_srl;
 				$module_info->use_mobile = $use_mobile;
 				$module_info->is_mskin_fix = 'Y';
 				$module_info->mskin = $mskin;
@@ -1822,7 +1837,7 @@
             FileHandler::removeFile($tar_file);
 
             $this->setMessage('success_updated');
-			$returnUrl = getNotEncodedUrl('', 'mid', 'upgletyle', 'act', 'dispUpgletyleToolLayoutConfigEdit','vid',Context::get('vid'));
+			$returnUrl = getNotEncodedUrl('', 'mid', 'upgletyle', 'act', 'dispUpgletyleToolLayoutConfigEdit');
 			$this->setRedirectUrl($returnUrl);
         }
 
@@ -2119,46 +2134,12 @@
          **/
         function triggerDeleteModule(&$obj) {
 
-            $oModuleController = &getController('module');
-            $oCounterController = &getController('counter');
-            $oAddonController = &getController('addon');
-            $oEditorController = &getController('editor');
             $oUpgletyleModel = &getModel('upgletyle');
-            $oModuleModel = &getModel('module');
 
-            $oUpgletyle = new UpgletyleInfo($module_srl);
-
-			//Delete site info, except default site
-			if($oUpgletyle->site_srl)
-			{
-				$args->site_srl = $oUpgletyle->site_srl;
-				executeQuery('module.deleteSite', $args);
-				executeQuery('module.deleteSiteAdmin', $args);
-				executeQuery('member.deleteMemberGroup', $args);
-				executeQuery('member.deleteSiteGroup', $args);
-				executeQuery('module.deleteLangs', $args);
-            
-				//clear cache for default mid
-				$site_info = $oModuleModel->getSiteInfo($site_srl);
-				$vid = $site_info->domain;
-				$mid = $site_info->mid;
-				$oCacheHandler = &CacheHandler::getInstance('object');
-				if($oCacheHandler->isSupport()){
-					$cache_key = 'object_default_mid:'.$vid.'_'.$mid;
-					$oCacheHandler->delete($cache_key);
-					$cache_key = 'object_default_mid:'.$vid.'_';
-					$oCacheHandler->delete($cache_key);
-				}
-				
-				$lang_supported = Context::get('lang_supported');
-				foreach($lang_supported as $key => $val) {
-					$lang_cache_file = _XE_PATH_.'files/cache/lang_defined/'.$args->site_srl.'.'.$key.'.php';
-					FileHandler::removeFile($lang_cache_file);
-				}
-				$oCounterController->deleteSiteCounterLogs($args->site_srl);
-				$oAddonController->removeAddonConfig($args->site_srl);
-				$oEditorController->removeEditorConfig($args->site_srl);
-			}
+            // Note: this module no longer auto-creates or auto-deletes a dedicated
+            // domain/domain-scoped addon+editor config when an instance is removed.
+            // If this instance had its own domain, clean it up manually via the core
+            // multi-domain admin screen if desired.
 
             $args->module_srl = $module_srl;
             executeQuery('upgletyle.deleteUpgletyle', $args);
@@ -2192,7 +2173,7 @@
 			if($oModule->act == 'dispMemberLogout') return new Object();
 
             $site_module_info = Context::get('site_module_info');
-            if(!$site_module_info || !$site_module_info->site_srl || $site_module_info->mid != $this->upgletyle_mid) return new Object();
+            if(!$site_module_info || !($site_module_info->domain_srl ?? 0) || $site_module_info->mid != $this->upgletyle_mid) return new Object();
 
             $oModuleModel = &getModel('module');
             $xml_info = $oModuleModel->getModuleActionXml('upgletyle');
@@ -2345,25 +2326,25 @@
 
 
         function procUpgletyleToolInit(){
-            if(!$this->site_srl) return new Object(-1,'msg_invalid_request');
+            if(!$this->domain_srl) return new Object(-1,'msg_invalid_request');
 
             $oUpgletyleAdminController = &getAdminController('upgletyle');
-            $output = $oUpgletyleAdminController->initUpgletyle($this->site_srl);
+            $output = $oUpgletyleAdminController->initUpgletyle($this->domain_srl);
             return $output;
         }
 
 		function procUpgletyleRequestExport(){
-            if(!$this->site_srl) return new Object(-1,'msg_invalid_request');
+            if(!$this->domain_srl) return new Object(-1,'msg_invalid_request');
 
 			$oUpgletyleAdminController = &getAdminController('upgletyle');
-			$oUpgletyleAdminController->deleteExport($this->site_srl);
+			$oUpgletyleAdminController->deleteExport($this->domain_srl);
 
 			$args->export_type = Context::get('export_type');
 			if(!$args->export_type || $args->export_type!='xexml') $args->export_type='ttxml';
 
 			$logged_info = Context::get('logged_info');
 			$args->module_srl = $this->module_srl;
-			$args->site_srl = $this->site_srl;
+			$args->site_srl = $this->domain_srl;
 			$args->member_srl = $logged_info->member_srl;
 
 			$output = executeQuery('upgletyle.insertExport',$args);
@@ -2386,9 +2367,9 @@
 				$module_type = Context::get('module_type');
 				if(!$menu_name || !$module_type || !$menu_mid) return new Object(-1,'msg_invalid_request');
 	
-				$module_count = $oModuleModel->getModuleCount($this->site_srl, $module_type);
+				$module_count = $oModuleModel->getModuleCount($this->domain_srl, $module_type);
 				if($module_count >= $config->allow_service[$module_type]) return new Object(-1,'msg_module_count_exceed');
-				$args->site_srl = $this->site_srl;
+				$args->domain_srl = $this->domain_srl;
 				$args->mid = $menu_mid;
 				$args->browser_title = $menu_name;
 				$args->module = $module_type;
@@ -2397,13 +2378,13 @@
             }else {
             	$menu->type = 'text_page';
 				if(!$menu_name || !$menu_mid) return new Object(-1,'msg_invalid_request');
-				
-				$module_count = $oModuleModel->getModuleCount($this->site_srl, 'page');
+
+				$module_count = $oModuleModel->getModuleCount($this->domain_srl, 'page');
 				if($module_count >= $config->allow_service['page']) return new Object(-1,'msg_module_count_exceed');
-	            	
+
 	            $output = $oDocumentController->insertDocument($args);
-				
-				$args->site_srl = $this->site_srl;
+
+				$args->domain_srl = $this->domain_srl;
 				$args->mid = $menu_mid;
 				$args->browser_title = $menu_name;
 				$args->module = 'page';
@@ -2412,9 +2393,9 @@
 				$output = $oModuleController->insertModule($args);
 				if(!$output->toBool()) return $output;
             }
-            
+
 			$menu->name = $menu_name;
-			$menu->site_srl = $this->site_srl;
+			$menu->site_srl = $this->domain_srl;
 			$menu->module_srl = $output->get('module_srl');
 			$menu->list_order = $menu->module_srl;
 			$output = executeQuery('upgletyle.insertExtraMenu',$menu);
@@ -2429,7 +2410,7 @@
                     $oModuleModel = &getModel('module');
                     $oDocumentModel = &getModel('document');
                     $oDocumentController = &getController('document');
-                    $module_info = $oModuleModel->getModuleInfoByMid($menu_mid,$this->site_srl);
+                    $module_info = $oModuleModel->getModuleInfoByMid($menu_mid);
                     if(!$module_info) return new Object(-1,'msg_invalid_request');
                     
                     $buff = trim($module_info->content);
@@ -2454,7 +2435,7 @@
             $oModuleModel = &getModel('module');
 			$oModuleController = &getController('module');
 
-			$module_info = $oModuleModel->getModuleInfoByMid($menu_mid, $this->site_srl);
+			$module_info = $oModuleModel->getModuleInfoByMid($menu_mid);
 			if($module_info && $module_info->module_srl) $output = $oModuleController->deleteModule($module_info->module_srl);
 
 			$args->module_srl = $module_info->module_srl;
@@ -2471,7 +2452,7 @@
 				$order[$mid] = $k;
 			}
 
-			$args->site_srl = $this->site_srl;
+			$args->site_srl = $this->domain_srl;
 			$output = executeQueryArray('upgletyle.getExtraMenus',$args);
 			if(!$output->toBool() || !$output->data) return $output;
 

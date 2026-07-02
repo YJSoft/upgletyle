@@ -91,7 +91,7 @@
                 $upgletyle = $oUpgletyleModel->getUpgletyle($module_srl);
                 Context::set('upgletyle', $upgletyle);
 
-                $admin_list = $oModuleModel->getSiteAdmin($upgletyle->site_srl);
+                $admin_list = $oModuleModel->getAdminId($upgletyle->module_srl);
                 $site_admin = array();
                 if(is_array($admin_list)){
                     foreach($admin_list as $k => $v){
